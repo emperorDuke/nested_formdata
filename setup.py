@@ -22,19 +22,16 @@ with open('README.md') as f:
 
 
 setup(
-    name='nested_formdata',
+    name='drf_nested_formdata',
     version=version,
     url='http://github.com/emperorDuke/nested_formdata',
     license='MIT',
     description=('converts a nested multipart formdata into its primitive data structure'),
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords=('drf restframework rest_framework_nested_multipart_parser 
-            'nested multipart formdata'
-              ' deserializers nested_formdata'),
     author='emperorDuke',
     author_email='effiomduke@gmail.com',
-    packages=['nested_formdata'],
+    packages=['drf_nested_formdata'],
     zip_safe=False,
     classifiers=[
         'Environment :: Web Environment',
@@ -53,5 +50,9 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
         'License :: OSI Approved :: MIT License',
+    ], 
+    test_suite='tests',
+    tests_require=[
+        'djangorestframework'
     ]
 )
