@@ -17,7 +17,7 @@ def get_version(package):
 
 version = get_version('drf_nested_formdata')
 
-with open('README.md') as f:
+with open(os.path.join(os.path.dirname(__file__), 'README.rst'), 'r') as f:
     long_description = f.read()
 
 
@@ -26,9 +26,9 @@ setup(
     version=version,
     url='http://github.com/emperorDuke/nested_formdata',
     license='MIT',
-    description=('converts a nested multipart formdata into its primitive data structure'),
+    description='Converts a nested multipart formdata into its primitive data structure',
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    keywords=['drf', 'nested_formdata', 'drf_nested_formdata', 'restframework'],
     author='emperorDuke',
     author_email='effiomduke@gmail.com',
     packages=['drf_nested_formdata'],
