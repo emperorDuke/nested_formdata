@@ -20,7 +20,7 @@ Installation
 ============
 
 ```
-pip install drf-nested_formdata
+pip install drf_nested_formdata
 ```
 
 Usage

@@ -25,6 +25,7 @@ setup(
     name='drf_nested_formdata',
     version=version,
     url='http://github.com/emperorDuke/nested_formdata',
+    download_url='http://github.com/emperorDuke/nested_formdata/archive/0.1.1.tar.gz',
     license='MIT',
     description='Converts a nested multipart formdata into its primitive data structure',
     long_description=long_description,
