@@ -1,12 +1,13 @@
 DRF NESTED FORM-DATA
 =====================
-[![Build Status](https://travis-ci.org/beda-software/drf-writable-nested.svg?branch=master)](https://travis-ci.org/beda-software/drf-writable-nested)
-[![codecov](https://codecov.io/gh/beda-software/drf-writable-nested/branch/master/graph/badge.svg)](https://codecov.io/gh/beda-software/drf-writable-nested)
+
 [![pypi](https://img.shields.io/pypi/v/drf-writable-nested.svg)](https://pypi.python.org/pypi/drf-nested-formdata)
 [![pyversions](https://img.shields.io/pypi/pyversions/drf-writable-nested.svg)](https://pypi.python.org/pypi/drf-nested-formdata)
 
 This is a nested multipart parser for Django REST Framework which parses
-nested form-data into its primitive data structure.
+nested form-data into its primitive data structure. It also comes utility 
+class that enables dealing with nested params in formdata anywhere in 
+the code.
 
 Requirements
 ============
@@ -19,13 +20,13 @@ Installation
 ============
 
 ```
-pip install drf-writable-nested
+pip install drf-nested_formdata
 ```
 
 Usage
 =====
 
-For example, for the following model structure:
+The parser is used with a djangorestframework view:
 
 ```python
 
@@ -44,7 +45,7 @@ class TestView(APIView):
 
 ```
 
-For example, we can post a nested data like below to this view:
+Form example, a formdata with nested params like below can be posted to the above view:
 
 ```python
 data = {
@@ -91,7 +92,50 @@ data = [
         'foo': { 'baaz': True }
     }
 ]
+
 ```
+The utiliy class can be used directly in any part of the code.
+
+````python
+
+from drf_nested_formdata.utils import NestedFormDataSerializer
+
+data = {
+    'item[attribute][0][user_type]': 'size',
+    'item[attribute][1][user_type]': '',
+    'item[verbose][]': '',
+    'item[variant][vendor_metric]': 'L',
+    'item[variant][metric_verbose_name]': 'Large',
+    'item[foo][baaz]': 'null',
+}
+
+serializerObject = NestedFormDataSerializer(data)
+serializerObject.is_valid(raise_exception=True)
+````
+The parsed result will look below:
+
+```python
+print(serializerObject.data)
+
+data = {
+    'item': {
+        'attribute': [
+            {'user_type': 'size'}, 
+            {'user_type': ''}
+        ], 
+        'verbose': [''], 
+        'variant': {
+            'vendor_metric': 'L', 
+            'metric_verbose_name': 'Large'
+        }, 
+        'foo': { 'baaz': None }
+    }
+}
+```
+
+Note
+----
+**.is_valid()** should be called before accessing the **.data**
 
 
 Authors
