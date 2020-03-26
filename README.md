@@ -94,7 +94,7 @@ data = [
 ]
 
 ```
-The utiliy class can be used directly in any part of the code.
+The utiliy class can also be used directly in any part of the code.
 
 ````python
 
