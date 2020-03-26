@@ -2,8 +2,7 @@ import re
 
 from collections.abc import Mapping
 
-from django.http import QueryDict
-from rest_framework.exceptions import ParseError
+from .exception import ParseError
 
 from .mixins import UtilityMixin
 
@@ -62,7 +61,8 @@ class Base(UtilityMixin):
         Checks if the initial_data data is a dict and a nested object
         """
 
-        if isinstance(self._initial_data, QueryDict):
+        if hasattr(self._initial_data, 'getlist'):
+            # if true then it is a QueryDict
             self.__create_raw_data__(self._initial_data)
 
         conditions = [isinstance(self._initial_data, Mapping)]
@@ -186,8 +186,8 @@ class NestedFormDataSerializer(Base):
         argument
         """
         
-        is_dict = lambda v: isinstance(v, dict)
-        is_list = lambda v: isinstance(v, list)
+        def is_dict(v): return isinstance(v, dict)
+        def is_list(v): return isinstance(v, list)
 
         ######################################################
 
@@ -226,9 +226,9 @@ class NestedFormDataSerializer(Base):
                     if is_list(value) and context['value']:
                         value.append(context['value'])  
                     elif is_dict(value) and is_dict(context['value']):
-                        for k, v in context['value'].items():
+                        for key in context['value'].keys():
                             # if the key already exist do nothing
-                            if k in value:
+                            if key in value:
                                 return
                             else:
                                 # transfer all the value to the root or value
@@ -250,30 +250,44 @@ class NestedFormDataSerializer(Base):
         """
         Generates a context for every key
         """
-        keys = self.split(key)
-        IEL = self.is_empty_list
-        SB = self.strip_bracket
-        IDT = self.is_dict
-        EXI = self.extract_index
-        IL = self.is_list
-        LI = lambda k: 0 if IEL(k) else EXI(k)
+        sub_keys = self.split(key)
         index_keys = []
 
-        for i, current_key in enumerate(keys):
+        def get_index(key):
+            if self.is_dict(key):
+                return self.strip_bracket(key)
+            elif self.is_empty_list(key):
+                return 0
+            
+            return self.extract_index(key)
+
+        def get_value(index):
+            if index < len(sub_keys):
+                if self.is_dict(sub_keys[index]):
+                    return { self.strip_bracket(sub_keys[index]): None }
+                else:
+                    return []
+            
+            return value
+
+        def get_index_keys(index):
+            if index >= 0:
+                index_keys.append(get_index(sub_keys[index]))
+                return index_keys
+
+            return index_keys
+
+        #########################################################    
+
+        for i, sub_key in enumerate(sub_keys):
             next_i = i + 1
             prev_i = i - 1
 
-            obj = lambda k: { SB(k): None } if IDT(k) else []
-            get_index = lambda k: SB(k) if IDT(k) else LI(k)
-            get_value = lambda i: obj(keys[i]) if i < len(keys) else value
-            
-            if prev_i > -1: index_keys.append(get_index(keys[prev_i]))
-
             context = {
                 'depth': i,
-                'index': get_index(current_key),
+                'index': get_index(sub_key),
                 'value': get_value(next_i),
-                'keys': index_keys
+                'keys': get_index_keys(prev_i)
             }
 
             self.generate_structure(root_tree, context)
