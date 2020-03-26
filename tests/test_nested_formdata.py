@@ -94,7 +94,7 @@ class NestedFormDataTestCase(unittest.TestCase):
             'item[attribute][0][user_type]': 'size',
             'item[attribute][1][user_type]': '',
             'item[verbose][]': '',
-            'item[variant][vendor_metric]': 'L',
+            'item[variant][vendor_metric]': '[]',
             'item[variant][metric_verbose_name]': 'Large',
             'item[foo][baaz]': 'null',
         }
@@ -107,13 +107,19 @@ class NestedFormDataTestCase(unittest.TestCase):
                 ], 
                 'verbose': [''], 
                 'variant': {
-                    'vendor_metric': 'L', 
+                    'vendor_metric': None, 
                     'metric_verbose_name': 'Large'
                 }, 
                 'foo': { 'baaz': None }
                 }
             }
-        serializerObject = NestedFormDataSerializer(data_4)
+
+        kwargs = {
+            'allow_blank': True,
+            'allow_empty': False
+        }
+        
+        serializerObject = NestedFormDataSerializer(data_4, **kwargs)
         serializerObject.is_valid(raise_exception=True)
         self.assertTrue(isinstance(serializerObject.data['item'], dict))
         self.assertEqual(serializerObject.data, expected_output)

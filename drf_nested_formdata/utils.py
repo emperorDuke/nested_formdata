@@ -257,6 +257,9 @@ class NestedFormDataSerializer(Base):
             if self.is_dict(key):
                 return self.strip_bracket(key)
             elif self.is_empty_list(key):
+                # an empty list always has it index as '0'
+                # unless the key is repeated, then it will 
+                # have an array of values attached to the same key
                 return 0
             
             return self.extract_index(key)
@@ -264,6 +267,8 @@ class NestedFormDataSerializer(Base):
         def get_value(index):
             if index < len(sub_keys):
                 if self.is_dict(sub_keys[index]):
+                    # at this time the value of the dict is unknown 
+                    # so `None` is used 
                     return { self.strip_bracket(sub_keys[index]): None }
                 else:
                     return []
@@ -294,6 +299,9 @@ class NestedFormDataSerializer(Base):
 
 
     def pre_process_data(self):
+        """
+        It groups data structures of the same kind and namespaces together
+        """
         temp, container, data = {}, [], self.validated_data
 
         for key, value in data.items():

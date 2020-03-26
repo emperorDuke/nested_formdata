@@ -104,12 +104,17 @@ data = {
     'item[attribute][0][user_type]': 'size',
     'item[attribute][1][user_type]': '',
     'item[verbose][]': '',
-    'item[variant][vendor_metric]': 'L',
+    'item[variant][vendor_metric]': '[]',
     'item[variant][metric_verbose_name]': 'Large',
     'item[foo][baaz]': 'null',
 }
 
-serializerObject = NestedFormDataSerializer(data)
+kwargs = {
+    'allow_blank': True,
+    'allow_empty': False
+}
+
+serializerObject = NestedFormDataSerializer(data, **kwargs)
 serializerObject.is_valid(raise_exception=True)
 ````
 The parsed result will look below:
@@ -125,7 +130,7 @@ data = {
         ], 
         'verbose': [''], 
         'variant': {
-            'vendor_metric': 'L', 
+            'vendor_metric': None, 
             'metric_verbose_name': 'Large'
         }, 
         'foo': { 'baaz': None }
@@ -138,6 +143,6 @@ Note
 **.is_valid()** should be called before accessing the **.data**
 
 
-Authors
+Author
 =======
 2020, EmperorDuke
