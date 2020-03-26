@@ -251,7 +251,8 @@ class NestedFormDataSerializer(Base):
         Generates a context for every key
         """
 
-        keys = self.split(key)
+        sub_keys = self.split(key)
+        index_keys = []
 
         IEL = self.is_empty_list
         SB = self.strip_bracket
@@ -262,21 +263,19 @@ class NestedFormDataSerializer(Base):
         LI = lambda k: 0 if IEL(k) else EXI(k)
         obj = lambda k: { SB(k): None } if IDT(k) else []
         get_index = lambda k: SB(k) if IDT(k) else LI(k)
-        get_value = lambda i: obj(keys[i]) if i < len(keys) else value
+        get_value = lambda i: obj(sub_keys[i]) if i < len(sub_keys) else value
+        get_index_keys = lambda i: index_keys+=[get_index(sub_keys[i])] if i >= 0 else index_keys
             
-        index_keys = []
 
-        for i, current_key in enumerate(keys):
+        for i, sub_key in enumerate(sub_keys):
             next_i = i + 1
             prev_i = i - 1
 
-            if prev_i > -1: index_keys.append(get_index(keys[prev_i]))
-
             context = {
                 'depth': i,
-                'index': get_index(current_key),
+                'index': get_index(sub_key),
                 'value': get_value(next_i),
-                'keys': index_keys
+                'keys': get_index_keys(prev_i)
             }
 
             self.generate_structure(root_tree, context)
