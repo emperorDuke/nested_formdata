@@ -81,7 +81,7 @@ Parser classes supported:
 - ``NestedMultipartParser``: which is just a normal DRF multipart parser but can also parse nested form data.
 - ``NestedJSONParser``: which is also just a normal DRF JSONParser but can also parse a nested json request.
 
-To change default settings of the parsers, add the ``NESTED_PARSER_OPTIONS`` with new settings to your django settings file
+To change default settings of the parsers, add the ``NESTED_PARSER_OPTIONS`` with the new settings to your django settings file
 
 ```python
 #..
