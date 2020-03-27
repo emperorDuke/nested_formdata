@@ -77,8 +77,8 @@ DRF Integration
 
 The parser is used with a djangorestframework view class.
 
-Parser class supported
-----------------------
+Parser classes supported:
+------------------------
 - ``NestedMultipartParser``: which is used for parsing nested form data.
 - ``NestedJSONParser``: which is used for parsing nested json request.
 
