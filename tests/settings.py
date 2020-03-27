@@ -1,7 +1,10 @@
 SECRET_KEY = '1234'
+
 RESTFRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
 }
+
+ROOT_URLCONF = 'tests.urls'
 
 DATABASES = {
     'default': {

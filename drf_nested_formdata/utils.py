@@ -323,8 +323,11 @@ class NestedFormDataSerializer(Base):
                 else:
                     temp.setdefault(key, value)
             else:
-                temp.setdefault(key, value)
-            
-        if temp: container.append({ '': temp })
+                if self.is_last(key, data, 'O'):
+                    temp.setdefault(key, value) 
+                    container.append({ '': temp })
+                    temp = {}
+                else:
+                    temp.setdefault(key, value)
 
         return container

@@ -166,7 +166,7 @@ class UtilityMixin(object):
             
             return is_last
 
-        def namespace(current_key=current_key):
+        def namespace():
             try:
                 next_key = keys[next_index]
                 if self.is_namespaced(next_key):
@@ -184,6 +184,23 @@ class UtilityMixin(object):
 
             return is_last
 
+        def ordinary():
+            try:
+                if not self.is_namespaced(keys[next_index]):
+                    next_k = self.split(keys[next_index])[0]
+
+                    if not self.is_list(next_k) and not self.is_dict(next_k):
+                        is_last = False
+                    else:
+                        is_last = True
+                else:
+                    is_last = True
+            except IndexError:
+                is_last = True
+            
+            return is_last
+
+
         if is_type_of == 'L':
             return object_type(self.is_list)
         elif is_type_of == 'N':
@@ -191,4 +208,4 @@ class UtilityMixin(object):
         elif is_type_of == 'D':
             return object_type(self.is_dict)
         else:
-            return False
+            return ordinary()
