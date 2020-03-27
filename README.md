@@ -1,5 +1,6 @@
 DRF NESTED FORM-DATA
 =====================
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/emperorDuke/nested_formdata)()
 
 [![pypi](https://img.shields.io/pypi/v/drf-writable-nested.svg)](https://pypi.python.org/pypi/drf-nested-formdata)
 [![pyversions](https://img.shields.io/pypi/pyversions/drf-writable-nested.svg)](https://pypi.python.org/pypi/drf-nested-formdata)
