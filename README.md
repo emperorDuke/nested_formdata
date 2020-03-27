@@ -1,4 +1,4 @@
-DRF NESTED FORM_DATA
+DRF_NESTED_FORM_DATA
 =====================
 
 A library that converts nested json-like form data back to python object.
@@ -98,7 +98,7 @@ class TestView(APIView):
 
 ```
 
-Form example, a formdata with nested params like below can be posted to the above view:
+Form example, a form data with nested params like below can be posted to the above drf view:
 
 ```python
 data = {
@@ -149,7 +149,7 @@ data = [
 
 Options
 =======
-option|default|description
+Option|Default|Description
 ------|-------|-----------
 allow_blank|``True``|shows empty string ``''``in the object
 allow_empty|``False``|shows empty ``list`` or ``dict`` object
