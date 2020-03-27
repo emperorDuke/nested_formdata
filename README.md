@@ -1,8 +1,15 @@
-DRF NESTED FORM-DATA
+DRF NESTED FORM_DATA
 =====================
+
+A library that converts nested json-like form data back to python object.
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/emperorDuke/nested_formdata)]()
 [![PyPI - License](https://img.shields.io/pypi/l/drf_nested_formdata)](https://pypi.python.org/pypi/drf-nested-formdata)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/drf_nested_formdata)](https://pypi.python.org/pypi/drf-nested-formdata)
+[![PyPI](https://img.shields.io/pypi/v/drf_nested_formdata)](https://pypi.python.org/pypi/drf-nested-formdata)
+
+OVERVIEW
+========
 
 This is a nested multipart parser for Django REST Framework which parses
 nested form-data into its primitive data structure. It also comes utility 
@@ -42,12 +49,12 @@ data = {
     'item[foo][baaz]': 'null',
 }
 
-kwargs = {
+options = {
     'allow_blank': True,
     'allow_empty': False
 }
 
-serializerObject = NestedFormDataSerializer(data, **kwargs)
+serializerObject = NestedFormDataSerializer(data, **options)
 serializerObject.is_valid(raise_exception=True)
 ````
 The parsed result will look below:
@@ -140,7 +147,8 @@ data = [
     }
 ]
 
-==========|
+OPTIONS
+=======
 
 Note
 ----
