@@ -56,7 +56,7 @@ options = {
 serializerObject = NestedFormDataSerializer(data, **options)
 serializerObject.is_valid(raise_exception=True)
 ````
-The parsed result will look below:
+The parsed result will look like below:
 
 ```python
 print(serializerObject.data)
