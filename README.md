@@ -48,7 +48,12 @@ options = {
     'allow_blank': True,
     'allow_empty': False
 }
+````
+Note
+----
+``.is_valid()`` should be called before accessing the ``.data``
 
+````python
 serializerObject = NestedFormDataSerializer(data, **options)
 serializerObject.is_valid(raise_exception=True)
 ````
@@ -154,11 +159,6 @@ Option|Default|Description
 ------|-------|-----------
 allow_blank|``True``|shows empty string ``''``in the object
 allow_empty|``False``|shows empty ``list`` or ``dict`` object
-
-Note
-----
-``.is_valid()`` should be called before accessing the ``.data``
-
 
 Author
 =======
