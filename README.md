@@ -10,11 +10,7 @@ A library that converts nested json-like form data back to python object.
 
 Overview
 ========
-
-This is a nested multipart parser for Django REST Framework which parses
-nested form-data into its primitive data structure. It also comes utility 
-class that enables dealing with nested params in formdata anywhere in 
-the code.
+SPA's, sometimes send nested form data or json as requests which can be difficult to handle due to the key naming conventions. This library helps to eliminate that difficulty, by parsing that nested request into python object that can be used by libraries like ``drf_writable_nested``.
 
 Requirements
 ============
@@ -79,7 +75,11 @@ data = {
 DRF Integration
 ===============
 
-The parser is used with a djangorestframework view:
+The parser is used with a djangorestframework view class:
+Parser class supported
+----------------------
+- ``NestedMultipartParser``: which is used for parsing nested form data.
+- ``NestedJSONParser``: which is used for parsing nested json request.
 
 ```python
 
