@@ -1,7 +1,7 @@
 DRF NESTED FORMDATA
 ===================
 
-A library that converts nested json-like form data back to python object.
+A library that parses nested json or form data to python object.
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/emperorDuke/nested_formdata)](https://github.com/emperorDuke/nested_formdata/releases)
 [![PyPI - License](https://img.shields.io/pypi/l/drf_nested_formdata)](https://pypi.python.org/pypi/drf-nested-formdata)
@@ -89,7 +89,7 @@ from rest_framework.response import Response
 
 from drf_nested_formdata.parser import NestedMultpartParser, NestedJSONParser
 
-class TestView(APIView):
+class TestMultipartParserView(APIView):
     # we are using a `NestedMultipartParser` which is also just a normal
     # DRF multipart parser
     parser_classes = (NestedMultpartParser, FormParser)
@@ -98,9 +98,11 @@ class TestView(APIView):
 
         return Response(data=request.data, status=200)
 
-        or
+    
+    # or
 
-class TestView(APIView):
+
+class TestJSONParserView(APIView):
     # we are using a `NestedJSONParser` which is also just a normal
     # DRF JSON parser
     parser_classes = (NestedJSONParser, FormParser)
@@ -162,9 +164,9 @@ Options
 =======
 Option|Default|Description
 ------|-------|-----------
-allow_blank|``True``|shows empty string ``''``in the object
+allow_blank|``True``|shows empty string ``''`` in the object
 allow_empty|``False``|shows empty ``list`` or ``dict`` object
 
 Author
 =======
-@Copyright 2020, Duke
+@Copyright 2020, Duke Effiom

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import os
 import re
-from io import open
 
 from setuptools import setup
 
@@ -16,6 +15,7 @@ def get_version(package):
 
 
 version = get_version('drf_nested_formdata')
+
 this_directory = os.path.abspath(os.path.dirname(__file__))
 
 with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -26,13 +26,13 @@ setup(
     name='drf_nested_formdata',
     version=version,
     url='http://github.com/emperorDuke/nested_formdata',
-    download_url='http://github.com/emperorDuke/nested_formdata/archive/0.1.3.tar.gz',
+    download_url='http://github.com/emperorDuke/nested_formdata/archive/0.1.4.tar.gz',
     license='MIT',
-    description='Parses a nested params in form data or json request into python object',
+    description='A library that parses nested json or form data to python object',
     long_description=long_description,
     long_description_content_type='text/markdown',
     keywords=['drf', 'nested_formdata', 'drf_nested_formdata', 'restframework', 'nested json'],
-    author='emperorDuke',
+    author='Duke Effiom',
     author_email='effiomduke@gmail.com',
     packages=['drf_nested_formdata'],
     zip_safe=False,
