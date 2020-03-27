@@ -8,7 +8,7 @@ A library that converts nested json-like form data back to python object.
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/drf_nested_formdata)](https://pypi.python.org/pypi/drf-nested-formdata)
 [![PyPI](https://img.shields.io/pypi/v/drf_nested_formdata)](https://pypi.python.org/pypi/drf-nested-formdata)
 
-OVERVIEW
+Overview
 ========
 
 This is a nested multipart parser for Django REST Framework which parses
@@ -76,7 +76,7 @@ data = {
     }
 }
 ```
-DRF integration
+DRF Integration
 ===============
 
 The parser is used with a djangorestframework view:
@@ -147,8 +147,11 @@ data = [
 ]
 ```
 
-OPTIONS
+Options
 =======
+option|default|description
+------|-------|-----------
+allow_empty|True|shows empty string ``''``in the object
 
 Note
 ----
