@@ -1,4 +1,4 @@
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import MultiPartParser, JSONParser
 
 from .utils import NestedFormDataSerializer
 
@@ -24,3 +24,19 @@ class NestedMultpartParser(MultiPartParser):
             return serializerObject.data
         
         return parsed
+
+
+class NestedJSONParser(JSONParser):
+    """
+    Parser JSON data that is nested
+    """
+    def parse(self, stream, media_type=None, parser_context=None):
+        parsed = super().parse(stream, media_type, parser_context)
+
+        serializerObject = NestedFormDataSerializer(parsed)
+
+        if serializerObject.is_valid():
+            return serializerObject.data
+        
+        return parsed
+
