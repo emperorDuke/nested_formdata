@@ -111,7 +111,7 @@ class TestView(APIView):
 
 ```
 
-Form example, a form or JSON data with nested params like below can be posted to the above drf view:
+For example, a form or JSON data with nested params like below can be posted to the above drf view:
 
 ```python
 data = {
