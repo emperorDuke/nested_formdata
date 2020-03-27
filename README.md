@@ -26,6 +26,53 @@ pip install drf_nested_formdata
 Usage
 =====
 
+```
+The utiliy class can be used directly in any part of the code.
+
+````python
+
+from drf_nested_formdata.utils import NestedFormDataSerializer
+
+data = {
+    'item[attribute][0][user_type]': 'size',
+    'item[attribute][1][user_type]': '',
+    'item[verbose][]': '',
+    'item[variant][vendor_metric]': '[]',
+    'item[variant][metric_verbose_name]': 'Large',
+    'item[foo][baaz]': 'null',
+}
+
+kwargs = {
+    'allow_blank': True,
+    'allow_empty': False
+}
+
+serializerObject = NestedFormDataSerializer(data, **kwargs)
+serializerObject.is_valid(raise_exception=True)
+````
+The parsed result will look below:
+
+```python
+print(serializerObject.data)
+
+data = {
+    'item': {
+        'attribute': [
+            {'user_type': 'size'}, 
+            {'user_type': ''}
+        ], 
+        'verbose': [''], 
+        'variant': {
+            'vendor_metric': None, 
+            'metric_verbose_name': 'Large'
+        }, 
+        'foo': { 'baaz': None }
+    }
+}
+```
+DRF integration
+===============
+
 The parser is used with a djangorestframework view:
 
 ```python
@@ -93,50 +140,7 @@ data = [
     }
 ]
 
-```
-The utiliy class can also be used directly in any part of the code.
-
-````python
-
-from drf_nested_formdata.utils import NestedFormDataSerializer
-
-data = {
-    'item[attribute][0][user_type]': 'size',
-    'item[attribute][1][user_type]': '',
-    'item[verbose][]': '',
-    'item[variant][vendor_metric]': '[]',
-    'item[variant][metric_verbose_name]': 'Large',
-    'item[foo][baaz]': 'null',
-}
-
-kwargs = {
-    'allow_blank': True,
-    'allow_empty': False
-}
-
-serializerObject = NestedFormDataSerializer(data, **kwargs)
-serializerObject.is_valid(raise_exception=True)
-````
-The parsed result will look below:
-
-```python
-print(serializerObject.data)
-
-data = {
-    'item': {
-        'attribute': [
-            {'user_type': 'size'}, 
-            {'user_type': ''}
-        ], 
-        'verbose': [''], 
-        'variant': {
-            'vendor_metric': None, 
-            'metric_verbose_name': 'Large'
-        }, 
-        'foo': { 'baaz': None }
-    }
-}
-```
+==========|
 
 Note
 ----
