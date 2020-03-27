@@ -75,7 +75,7 @@ data = {
 DRF Integration
 ===============
 
-The parser is used with a djangorestframework view class:
+The parser is used with a djangorestframework view class.
 Parser class supported
 ----------------------
 - ``NestedMultipartParser``: which is used for parsing nested form data.
