@@ -74,12 +74,29 @@ data = {
 DRF Integration
 ===============
 
-The parser is used with a djangorestframework view class.
+The parser is used with a djangorestframework view classes.
 
 Parser classes supported:
 ------------------------
 - ``NestedMultipartParser``: which is just a normal DRF multipart parser but can also parse nested form data.
 - ``NestedJSONParser``: which is also just a normal DRF JSONParser but can also parse a nested json request.
+
+Add the ``NESTED_PARSER_OPTIONS`` to your django settings file
+
+```python
+#..
+
+REST_FRAMEWORK = {
+    'NESTED_PARSER_OPTIONS': { 
+        'allow_empty': False, 
+        'allow_blank': True 
+        }
+    }
+}
+
+#...
+
+```
 
 ```python
 
@@ -113,7 +130,7 @@ class TestJSONParserView(APIView):
 
 ```
 
-For example, a form or JSON data with nested params like below can be posted to the above drf view:
+For example, a form or JSON data with nested params like below can be posted to any of the above drf view:
 
 ```python
 data = {
@@ -131,7 +148,7 @@ data = {
     '[1][logo]': '235'
 }
 ```
-Our parsed request.data should look like this:
+after being parsed, the ``request.data`` will look like this:
 
 ```python
 print(request.data)
