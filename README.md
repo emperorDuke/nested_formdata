@@ -33,7 +33,6 @@ pip install drf_nested_formdata
 Usage
 =====
 
-```
 The utiliy class can be used directly in any part of the code.
 
 ````python
@@ -146,6 +145,7 @@ data = [
         'foo': { 'baaz': True }
     }
 ]
+```
 
 OPTIONS
 =======
