@@ -151,11 +151,12 @@ Options
 =======
 option|default|description
 ------|-------|-----------
-allow_empty|True|shows empty string ``''``in the object
+allow_blank|``True``|shows empty string ``''``in the object
+allow_empty|``False``|shows empty ``list`` or ``dict`` object
 
 Note
 ----
-**.is_valid()** should be called before accessing the **.data**
+``.is_valid()`` should be called before accessing the ``.data``
 
 
 Author
