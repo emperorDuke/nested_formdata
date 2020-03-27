@@ -10,7 +10,7 @@ A library that converts nested json-like form data back to python object.
 
 Overview
 ========
-SPA's, sometimes send nested form data or json as requests which can be difficult to handle due to the key naming conventions. This library helps to eliminate that difficulty, by parsing that nested requests into a more predictable python object that can be used by libraries like ``drf_writable_nested``.
+SPA's, sometimes send nested form data or json as requests which can be difficult to handle due to the key naming conventions. This library helps to eliminate that difficulty, by parsing that nested requests into a more predictable python object that can be used by libraries like ``drf_writable_nested`` or used directly in the code.
 
 Requirements
 ============
