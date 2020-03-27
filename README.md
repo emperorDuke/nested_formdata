@@ -135,8 +135,7 @@ Our parsed request.data should look like this:
 
 ```python
 print(request.data)
-```
-```python
+
 data = [
     {
         'attribute': True, 
