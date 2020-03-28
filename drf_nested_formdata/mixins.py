@@ -6,18 +6,18 @@ import re
 class UtilityMixin(object):
 
     _nested_re = (
-        re.compile(r'([\w]+)((\[([\w]*)\])+)'),
-        re.compile(r'(\[([\w]*)\]){2,}')
+        re.compile(r'(.+)((\[(.*)\])+)'),
+        re.compile(r'(\[(.*)\]){2,}')
     )
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
-    _list_re = re.compile(r'\[([\d]{1,3})\]')
-    _number_re = re.compile(r'[\d]+')
+    _list_re = re.compile(r'\[([0-9]{1,3})\]')
+    _number_re = re.compile(r'[\0-9]+')
     _empty_list_re = re.compile(r'\[\]')
     _empty_dict_re = re.compile(r'\{\}')
     _dict_re = (
-        re.compile(r'\[([\D]+)\]'),
-        re.compile(r'\[(\D\w)\]'),
-        re.compile(r'\[(\w\D)\]'),
+        re.compile(r'\[([^0-9]+)\]'),
+        re.compile(r'\[([^0-9].)\]'),
+        re.compile(r'\[(.[^0-9])\]'),
         re.compile(r'\[([\w]{4,})\]')
     )
 

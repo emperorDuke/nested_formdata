@@ -1,11 +1,10 @@
 from rest_framework.parsers import MultiPartParser, JSONParser
 
-
-from .utils import NestedFormDataSerializer
+from .utils import NestedForm
 from .settings import api_settings
 
 
-class NestedMultpartParser(MultiPartParser):
+class NestedMultiPartParser(MultiPartParser):
     """
     Parser for multipart form data that is nested and also
     it may include files
@@ -16,17 +15,16 @@ class NestedMultpartParser(MultiPartParser):
         parsed = super().parse(stream, media_type, parser_context)
 
         # files and data have to be merged into one
-        
         if parsed.files:
             self._full_data = parsed.data.copy()
             self._full_data.update(parsed.files)
         else:
             self._full_data = parsed.data
 
-        serializerObject = NestedFormDataSerializer(self._full_data, **self.options)
+        form = NestedForm(self._full_data, **self.options)
 
-        if serializerObject.is_valid():
-            return serializerObject.data
+        if form.is_valid():
+            return form.data
         
         return parsed
 
@@ -40,10 +38,10 @@ class NestedJSONParser(JSONParser):
     def parse(self, stream, media_type=None, parser_context=None):
         parsed = super().parse(stream, media_type, parser_context)
 
-        serializerObject = NestedFormDataSerializer(parsed, **self.options)
+        form = NestedForm(parsed, **self.options)
 
-        if serializerObject.is_valid():
-            return serializerObject.data
+        if form.is_valid():
+            return form.data
         
         return parsed
 

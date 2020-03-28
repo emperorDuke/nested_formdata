@@ -27,7 +27,7 @@ The utiliy class can be used directly in any part of the code.
 
 ````python
 
-from drf_nested_formdata.utils import NestedFormDataSerializer
+from drf_nested_formdata.utils import NestedForm
 
 data = {
     'item[attribute][0][user_type]': 'size',
@@ -48,13 +48,13 @@ Note
 ``.is_valid()`` should be called before accessing the ``.data``
 
 ````python
-serializerObject = NestedFormDataSerializer(data, **options)
-serializerObject.is_valid(raise_exception=True)
+form = NestedForm(data, **options)
+form.is_valid(raise_exception=True)
 ````
 The parsed result will look like below:
 
 ```python
-print(serializerObject.data)
+print(form.data)
 
 data = {
     'item': {
@@ -78,8 +78,8 @@ The parser is used with a djangorestframework view classes.
 
 Parser classes supported:
 ------------------------
-- ``NestedMultipartParser``: which is just a normal DRF multipart parser but can also parse nested form data.
-- ``NestedJSONParser``: which is also just a normal DRF JSONParser but can also parse a nested json request.
+- ``NestedMultiPartParser``: which is just a normal DRF multipart parser that can also parse nested form data.
+- ``NestedJSONParser``: which is also just a normal DRF JSONParser that can also parse a nested json request.
 
 To change default settings of the parsers, add the ``NESTED_PARSER_OPTIONS`` with the new settings to your django settings file
 
@@ -104,20 +104,18 @@ from rest_framework.views import APIView
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 
-from drf_nested_formdata.parser import NestedMultpartParser, NestedJSONParser
+from drf_nested_formdata.parser import NestedMultiPartParser, NestedJSONParser
 
-class TestMultipartParserView(APIView):
-    # we are using a `NestedMultipartParser` which is also just a normal
+class TestMultiPartParserView(APIView):
+    # we are using a `NestedMultiPartParser` which is also just a normal
     # DRF multipart parser
-    parser_classes = (NestedMultpartParser, FormParser)
+    parser_classes = (NestedMultiPartParser, FormParser)
 
     def post(self, request):
 
         return Response(data=request.data, status=200)
-
     
     # or
-
 
 class TestJSONParserView(APIView):
     # we are using a `NestedJSONParser` which is also just a normal

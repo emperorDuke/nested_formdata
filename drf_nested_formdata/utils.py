@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+
 from .exception import ParseError
 from .mixins import UtilityMixin
 
@@ -101,9 +102,9 @@ class Base(UtilityMixin):
 # serilizes a nested form data to object
 #--------------------------------------- 
 
-class NestedFormDataSerializer(Base):
+class NestedForm(Base):
     """
-    Serialize a nested form-data object into its primitive data structure
+    Serialize nested forms into python object
     """
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs) 

@@ -2,11 +2,10 @@ import unittest
 
 from django.http import QueryDict
 
-from drf_nested_formdata.utils import NestedFormDataSerializer
+from drf_nested_formdata.utils import NestedForm
 
 
-
-class NestedFormDataTestCase(unittest.TestCase):     
+class NestedFormTestCase(unittest.TestCase):     
 
     def test_data_1(self):
 
@@ -45,10 +44,10 @@ class NestedFormDataTestCase(unittest.TestCase):
             }
         ]
     
-        serializerObject = NestedFormDataSerializer(data_1)
-        serializerObject.is_valid(raise_exception=True)
-        self.assertEqual(len(serializerObject.data), 2)
-        self.assertEqual(serializerObject.data, expected_output)
+        form = NestedForm(data_1)
+        form.is_valid(raise_exception=True)
+        self.assertEqual(len(form.data), 2)
+        self.assertEqual(form.data, expected_output)
 
     
     def test_data_2(self):
@@ -61,8 +60,9 @@ class NestedFormDataTestCase(unittest.TestCase):
             'variant': 'color',
         }
 
-        serializerObject = NestedFormDataSerializer(data_2)
-        self.assertFalse(serializerObject.is_valid())
+        form = NestedForm(data_2)
+
+        self.assertFalse(form.is_valid())
 
     def test_data_3(self):
         """
@@ -80,9 +80,11 @@ class NestedFormDataTestCase(unittest.TestCase):
             'attribute': 'size',
             'variant': ['color']
         }
-        serializerObject = NestedFormDataSerializer(data_3)
-        self.assertTrue(serializerObject.is_valid())
-        self.assertEqual(serializerObject.data, expected_output)
+
+        form = NestedForm(data_3)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.data, expected_output)
 
 
     def test_data_4(self):
@@ -114,15 +116,16 @@ class NestedFormDataTestCase(unittest.TestCase):
                 }
             }
 
-        kwargs = {
+        options = {
             'allow_blank': True,
             'allow_empty': False
         }
         
-        serializerObject = NestedFormDataSerializer(data_4, **kwargs)
-        serializerObject.is_valid(raise_exception=True)
-        self.assertTrue(isinstance(serializerObject.data['item'], dict))
-        self.assertEqual(serializerObject.data, expected_output)
+        form = NestedForm(data_4, **options)
+        form.is_valid(raise_exception=True)
+
+        self.assertTrue(isinstance(form.data['item'], dict))
+        self.assertEqual(form.data, expected_output)
 
     def test_data_5(self):
         """
@@ -147,9 +150,11 @@ class NestedFormDataTestCase(unittest.TestCase):
                     ]
                 }
             }
-        serializerObject = NestedFormDataSerializer(data_5)
-        serializerObject.is_valid(raise_exception=True)
-        self.assertEqual(serializerObject.data, expected_output)
+
+        form = NestedForm(data_5)
+        form.is_valid(raise_exception=True)
+
+        self.assertEqual(form.data, expected_output)
 
     def test_data_6(self):
         """
@@ -168,9 +173,11 @@ class NestedFormDataTestCase(unittest.TestCase):
                     }]
             }
         }
-        serializerObject = NestedFormDataSerializer(data_6)
-        serializerObject.is_valid(raise_exception=True)
-        self.assertEqual(serializerObject.data, expected_output)
+
+        form = NestedForm(data_6)
+        form.is_valid(raise_exception=True)
+
+        self.assertEqual(form.data, expected_output)
 
     def test_data_7(self):
         """
@@ -235,9 +242,11 @@ class NestedFormDataTestCase(unittest.TestCase):
                     'foo': {'baaz': 'ggg'}
                 }]
             }
-        serializerObject = NestedFormDataSerializer(data_7)
-        serializerObject.is_valid(raise_exception=True)
-        self.assertEqual(serializerObject.data, expected_output)
+
+        form = NestedForm(data_7)
+        form.is_valid(raise_exception=True)
+
+        self.assertEqual(form.data, expected_output)
 
     def test_data_8(self):
         """
@@ -254,6 +263,7 @@ class NestedFormDataTestCase(unittest.TestCase):
             'verbose': ['bazz', 'foo'] 
         }
 
-        serializerObject = NestedFormDataSerializer(data_8)
-        serializerObject.is_valid(raise_exception=True)
-        self.assertEqual(serializerObject.data, expected_output)
+        form = NestedForm(data_8)
+        form.is_valid(raise_exception=True)
+
+        self.assertEqual(form.data, expected_output)
