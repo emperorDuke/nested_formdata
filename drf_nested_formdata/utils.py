@@ -50,7 +50,7 @@ class Base(UtilityMixin):
         return self._validated_data
 
     def serialize(self, validated_data):
-        raise NotImplementedError('`serializer()` is not implemented')
+        raise NotImplementedError('`serialize()` is not implemented')
 
 
     def is_valid(self, raise_exception=False):
