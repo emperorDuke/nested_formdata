@@ -19,10 +19,10 @@ class Base(UtilityMixin):
             self.process()
             setattr(self, '_has_ran', True)
 
-    def __create_raw_data__(self, data):
+    def __create_raw_data__(self):
         raw_data = {}
 
-        for key, value in dict(data).items():
+        for key, value in dict(self._initial_data).items():
             if len(value) > 1:
                 raw_data[key] = value
             else:
@@ -60,7 +60,7 @@ class Base(UtilityMixin):
 
         if hasattr(self._initial_data, 'getlist'):
             # if true then it is a QueryDict
-            self.__create_raw_data__(self._initial_data)
+            self.__create_raw_data__()
 
         conditions = [isinstance(self._initial_data, Mapping)]
 
