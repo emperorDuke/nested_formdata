@@ -31,7 +31,7 @@ class NestedMultiPartParser(MultiPartParser):
 
 class NestedJSONParser(JSONParser):
     """
-    Parser JSON data that is nested
+    Parser for JSON data that is nested
     """
     options = api_settings.NESTED_PARSER_OPTIONS
 
