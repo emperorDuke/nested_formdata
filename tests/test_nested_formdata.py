@@ -46,6 +46,7 @@ class NestedFormTestCase(unittest.TestCase):
     
         form = NestedForm(data_1)
         form.is_valid(raise_exception=True)
+        
         self.assertEqual(len(form.data), 2)
         self.assertEqual(form.data, expected_output)
 

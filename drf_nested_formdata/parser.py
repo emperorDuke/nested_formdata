@@ -9,7 +9,7 @@ class NestedMultiPartParser(MultiPartParser):
     Parser for multipart form data that is nested and also
     it may include files
     """
-    options = api_settings.NESTED_PARSER_OPTIONS
+    options = api_settings.PARSER_OPTIONS
 
     def parse(self, stream, media_type=None, parser_context=None):
         parsed = super().parse(stream, media_type, parser_context)
@@ -33,7 +33,7 @@ class NestedJSONParser(JSONParser):
     """
     Parser for JSON data that is nested
     """
-    options = api_settings.NESTED_PARSER_OPTIONS
+    options = api_settings.PARSER_OPTIONS
 
     def parse(self, stream, media_type=None, parser_context=None):
         parsed = super().parse(stream, media_type, parser_context)
