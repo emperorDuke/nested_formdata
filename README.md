@@ -81,7 +81,7 @@ Parser classes supported:
 - ``NestedMultiPartParser``: is a default DRF multipart parser that suppport parsing nested form data.
 - ``NestedJSONParser``: is a default DRF JSONParser that support parsing nested json request.
 
-Add the parser to ypur django settings file
+Add the parser to your django settings file
 
 ```python
 
@@ -119,7 +119,7 @@ NESTED_FORM_PARSER = {
 #...
 
 ```
-The parsers can also be used directly in ``rest_framework`` view classes
+The parsers can also be used directly in a ``rest_framework`` view class
 
 ```python
 
@@ -130,21 +130,17 @@ from rest_framework.response import Response
 from drf_nested_formdata.parsers import NestedMultiPartParser, NestedJSONParser
 
 class TestMultiPartParserView(APIView):
-
     parser_classes = (NestedMultiPartParser, FormParser)
 
     def post(self, request):
-
         return Response(data=request.data, status=200)
     
-    # or
+# or
 
 class TestJSONParserView(APIView):
-
     parser_classes = (NestedJSONParser, FormParser)
 
     def post(self, request):
-
         return Response(data=request.data, status=200)
 
 ```
@@ -199,11 +195,11 @@ Options
 =======
 Option|Default|Description
 ------|-------|-----------
-allow_blank|``True``|shows empty string ``''`` in the object
-allow_empty|``False``|shows empty ``list`` or ``dict`` object
+allow_blank |``True``|shows empty string ``''`` in the object
+allow_empty |``False``|shows empty ``list`` or ``dict`` object
 
-Test
-====
+Tests
+=====
 ```
 py runtests.py
 ```

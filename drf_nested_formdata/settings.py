@@ -4,8 +4,6 @@ from rest_framework.settings import APISettings
 
 USER_SETTINGS = getattr(settings, 'NESTED_FORM_PARSER', {})
 
-ROOT_URLCONF = 'tests.urls'
-
 DEFAULTS = {
     'OPTIONS': { 
         'allow_empty': False, 
