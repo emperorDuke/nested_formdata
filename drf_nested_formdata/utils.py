@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 
-from .exception import ParseError
+from .exceptions import ParseError
 from .mixins import UtilityMixin
 
 
