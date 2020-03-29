@@ -10,3 +10,4 @@ VERSION = __version__
 from .utils import NestedForm
 from .mixins import UtilityMixin
 from .parsers import NestedMultiPartParser, NestedJSONParser
+from .exceptions import ParseError
