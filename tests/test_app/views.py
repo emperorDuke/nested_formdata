@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 from drf_nested_formdata.parsers import NestedMultiPartParser, NestedJSONParser
 
+
 class TestViewMultiPart(APIView):
     parser_classes = (NestedMultiPartParser, FormParser)
 
@@ -18,4 +19,3 @@ class TestViewJSON(APIView):
     def post(self, request):
 
         return Response(data=request.data, status=200)
-

@@ -5,7 +5,7 @@ from .mixins import UtilityMixin
 
 
 # Base serilizer for converting nested formdata to objects
-#----------------------------------------------------------
+# ----------------------------------------------------------
 
 class Base(UtilityMixin):
 
@@ -31,14 +31,14 @@ class Base(UtilityMixin):
         self._initial_data = raw_data
 
     @property
-    def data(self): 
+    def data(self):
         """
         Returns the final build
         """
         if not hasattr(self, '_final_data'):
             msg = '`.is_valid()` has to be called before accessing `.data`'
             raise AssertionError(msg)
-        
+
         return self._final_data
 
     @property
@@ -51,7 +51,6 @@ class Base(UtilityMixin):
 
     def serialize(self, validated_data):
         raise NotImplementedError('`serialize()` is not implemented')
-
 
     def is_valid(self, raise_exception=False):
         """
@@ -66,24 +65,25 @@ class Base(UtilityMixin):
 
         if not isinstance(self._initial_data, Mapping):
             msg = '`data` is not a map type'
-            if raise_exception: raise ValueError(msg)
+            if raise_exception:
+                raise ValueError(msg)
         else:
             matched_keys = [
-                bool(self.is_nested(key)) 
+                bool(self.is_nested(key))
                 for key in self._initial_data.keys()
-                ]
+            ]
 
             conditions.append(any(matched_keys))
 
             if not any(matched_keys):
                 msg = '`data` is not a nested type'
-                if raise_exception: raise ValueError(msg)
+                if raise_exception:
+                    raise ValueError(msg)
             else:
                 self._validated_data = self._initial_data
                 self.__run__()
 
             return all(conditions)
-
 
     def clean_value(self, value, default=None):
         """
@@ -100,14 +100,15 @@ class Base(UtilityMixin):
 
 
 # serilizes a nested form data to object
-#--------------------------------------- 
+# ---------------------------------------
 
 class NestedForm(Base):
     """
     Serialize nested forms into python object
     """
+
     def __init__(self, data, *args, **kwargs):
-        super().__init__(data, *args, **kwargs) 
+        super().__init__(data, *args, **kwargs)
 
     def process(self):
         """
@@ -118,9 +119,9 @@ class NestedForm(Base):
         for data in data_list:
             key = list(data.keys())[0]
             value = list(data.values())[0]
-            
+
             root_tree = self.serialize(value)
-        
+
             if not bool(key):
                 # although it support having different data structure
                 # it is not recommended.
@@ -133,8 +134,9 @@ class NestedForm(Base):
                         top.append(root_tree)
             else:
                 build.setdefault(key, root_tree)
-                
-        if build: top.append(build)
+
+        if build:
+            top.append(build)
 
         if len(top) == 1:
             setattr(self, '_final_data', top[0])
@@ -142,7 +144,6 @@ class NestedForm(Base):
             setattr(self, '_final_data', top)
         else:
             raise ParseError('unexpected empty container')
-
 
     def serialize(self, validated_data):
         """
@@ -167,22 +168,21 @@ class NestedForm(Base):
             if self.is_nested(key):
                 key = self.strip_namespace(key)
                 value = self.replace_specials(value)
-                
+
                 value = self.clean_value(value)
                 self.generate_context(key, value, self._root_tree)
             else:
                 # the root tree is automatically a dict
                 self._root_tree.setdefault(key, value)
-                
-        return self._root_tree        
 
+        return self._root_tree
 
     def generate_structure(self, root, context, depth=0):
         """
         Insert and updates the root tree according to the context passed as
         argument
         """
-        
+
         def is_dict(v): return isinstance(v, dict)
         def is_list(v): return isinstance(v, list)
 
@@ -197,11 +197,11 @@ class NestedForm(Base):
                 if diff > 1000:
                     raise ParseError('too many consecutive empty arrays !')
                 elif diff > 1:
-                    # if it is sparse 
+                    # if it is sparse
                     # fill gaps with the `None`
                     for _ in range(diff):
                         root.append(None)
-                    # append the default value 
+                    # append the default value
                     root.append(context['value'])
                 elif context['value'] and is_list(context['value']):
                     # if context value is not empty and its a list, transfer
@@ -221,7 +221,7 @@ class NestedForm(Base):
                 value = root[context['index']]
                 if value:
                     if is_list(value) and context['value']:
-                        value.append(context['value'])  
+                        value.append(context['value'])
                     elif is_dict(value) and is_dict(context['value']):
                         for key in context['value'].keys():
                             # if the key already exist do nothing
@@ -242,7 +242,6 @@ class NestedForm(Base):
             key = context['keys'][depth]
             self.generate_structure(root[key], context, depth=depth + 1)
 
-
     def generate_context(self, key, value, root_tree):
         """
         Generates a context for every key
@@ -255,21 +254,21 @@ class NestedForm(Base):
                 return self.strip_bracket(key)
             elif self.is_empty_list(key):
                 # an empty list always has it index as '0'
-                # unless the key is repeated, then it will 
+                # unless the key is repeated, then it will
                 # have an array of values attached to the same key
                 return 0
-            
+
             return self.extract_index(key)
 
         def get_value(index):
             if index < len(sub_keys):
                 if self.is_dict(sub_keys[index]):
-                    # at this time the value of the dict is unknown 
-                    # so `None` is used 
-                    return { self.strip_bracket(sub_keys[index]): None }
+                    # at this time the value of the dict is unknown
+                    # so `None` is used
+                    return {self.strip_bracket(sub_keys[index]): None}
                 else:
                     return []
-            
+
             return value
 
         def get_index_keys(index):
@@ -279,7 +278,7 @@ class NestedForm(Base):
 
             return index_keys
 
-        #########################################################    
+        #########################################################
 
         for i, sub_key in enumerate(sub_keys):
             next_i = i + 1
@@ -294,7 +293,6 @@ class NestedForm(Base):
 
             self.generate_structure(root_tree, context)
 
-
     def pre_process_data(self):
         """
         It groups data structures of the same kind and namespaces together
@@ -304,29 +302,29 @@ class NestedForm(Base):
         for key, value in data.items():
             if self.is_namespaced(key):
                 if self.is_last(key, data, 'N'):
-                    temp.setdefault(key, value) 
-                    container.append({ self.get_namespace(key): temp })
+                    temp.setdefault(key, value)
+                    container.append({self.get_namespace(key): temp})
                     temp = {}
                 else:
-                    temp.setdefault(key, value) 
+                    temp.setdefault(key, value)
             elif self.is_list(self.split(key)[0]):
                 if self.is_last(key, data, 'L'):
-                    temp.setdefault(key, value) 
-                    container.append({ '': temp })
+                    temp.setdefault(key, value)
+                    container.append({'': temp})
                     temp = {}
                 else:
                     temp.setdefault(key, value)
             elif self.is_dict(self.split(key)[0]):
                 if self.is_last(key, data, 'D'):
-                    temp.setdefault(key, value) 
-                    container.append({ '': temp })
+                    temp.setdefault(key, value)
+                    container.append({'': temp})
                     temp = {}
                 else:
                     temp.setdefault(key, value)
             else:
                 if self.is_last(key, data, 'O'):
-                    temp.setdefault(key, value) 
-                    container.append({ '': temp })
+                    temp.setdefault(key, value)
+                    container.append({'': temp})
                     temp = {}
                 else:
                     temp.setdefault(key, value)

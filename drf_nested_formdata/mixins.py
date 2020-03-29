@@ -1,7 +1,8 @@
 import re
 
 # Nested Form data deserializer utility class
-#--------------------------------------------
+# --------------------------------------------
+
 
 class UtilityMixin(object):
 
@@ -24,7 +25,7 @@ class UtilityMixin(object):
     @staticmethod
     def strip_bracket(string=''):
         return string.replace('[', '').replace(']', '')
-    
+
     @staticmethod
     def split(string=''):
         """
@@ -49,13 +50,13 @@ class UtilityMixin(object):
 
     def is_list(self, string=''):
         return bool(self._list_re.fullmatch(string))
-    
+
     def is_number(self, string=''):
-        return bool(self._number_re.fullmatch(string)) 
-    
+        return bool(self._number_re.fullmatch(string))
+
     def is_empty_list(self, string=''):
         return bool(self._empty_list_re.fullmatch(string))
-    
+
     def is_empty_dict(self, string=''):
         return bool(self._empty_dict_re.fullmatch(string))
 
@@ -66,8 +67,8 @@ class UtilityMixin(object):
             for pattern in self._nested_re
         ]
 
-        return any(condition) 
-    
+        return any(condition)
+
     def is_namespaced(self, string=''):
         return bool(self._namespace_re.match(string))
 
@@ -91,9 +92,9 @@ class UtilityMixin(object):
             assert len(splited_str) > 0, (
                 'Cannot strip namespace from' 'this key `%s`' % (string)
             )
-            
+
             string = ''.join(splited_str)
-            
+
             return string
 
         return string
@@ -105,7 +106,7 @@ class UtilityMixin(object):
             return int(number.group(0))
 
         return None
-        
+
     def replace_specials(self, string):
         """
         Checks for and replaces special characters like null, booleans
@@ -114,7 +115,7 @@ class UtilityMixin(object):
         # the incoming value may not be a string sometimes
         if not isinstance(string, str):
             return string
-            
+
         if string == 'null':
             return None
         elif string == 'true':
@@ -130,12 +131,11 @@ class UtilityMixin(object):
         else:
             return string
 
-
     def get_container(self, key, index=0):
         """
         It return the appropiate container `[]`|`{}`
         based on the key provided
-        """ 
+        """
         sub_keys = self.split(key)
 
         if self.is_list(sub_keys[index]):
@@ -144,7 +144,6 @@ class UtilityMixin(object):
             return {}
         else:
             return None
-
 
     def is_last(self, current_key, data, is_type_of):
         """
@@ -163,7 +162,7 @@ class UtilityMixin(object):
                     is_last = True
             except IndexError:
                 is_last = True
-            
+
             return is_last
 
         def namespace():
@@ -197,9 +196,8 @@ class UtilityMixin(object):
                     is_last = True
             except IndexError:
                 is_last = True
-            
-            return is_last
 
+            return is_last
 
         if is_type_of == 'L':
             return object_type(self.is_list)

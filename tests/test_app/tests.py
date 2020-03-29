@@ -4,7 +4,6 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 
-
 class TestViewTestCase(APITestCase):
 
     def test_multipart_view(self):
@@ -24,26 +23,27 @@ class TestViewTestCase(APITestCase):
             '[1][logo]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg')
         }
 
-        response = self.client.post('/test-multipart/', data, format='multipart')
-        
+        response = self.client.post(
+            '/test-multipart/', data, format='multipart')
+
         expected_output = [
             {
-                'attribute': True, 
-                'verbose': ['bazz', 'foo'], 
+                'attribute': True,
+                'verbose': ['bazz', 'foo'],
                 'variant': {
-                    'vendor_metric': None, 
+                    'vendor_metric': None,
                     'metric_verbose_name': 'Large'
-                }, 
-                'foo': { 'baaz': False }
-            }, 
+                },
+                'foo': {'baaz': False}
+            },
             {
-                'attribute': 'size', 
-                'verbose': None, 
+                'attribute': 'size',
+                'verbose': None,
                 'variant': {
-                    'vendor_metric': None, 
-                    'metric_verbose_name': { 'foo': { 'baaz': ['Large'] } }
-                }, 
-                'foo': { 'baaz': '' },
+                    'vendor_metric': None,
+                    'metric_verbose_name': {'foo': {'baaz': ['Large']}}
+                },
+                'foo': {'baaz': ''},
                 'logo': response.data[1]['logo']
             }
         ]
@@ -51,7 +51,6 @@ class TestViewTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data, expected_output)
-
 
     def test_json_view(self):
 
@@ -74,22 +73,22 @@ class TestViewTestCase(APITestCase):
 
         expected_output = [
             {
-                'attribute': True, 
-                'verbose': ['bazz', 'foo'], 
+                'attribute': True,
+                'verbose': ['bazz', 'foo'],
                 'variant': {
-                    'vendor_metric': None, 
+                    'vendor_metric': None,
                     'metric_verbose_name': 'Large'
-                }, 
-                'foo': { 'baaz': False }
-            }, 
+                },
+                'foo': {'baaz': False}
+            },
             {
-                'attribute': 'size', 
-                'verbose': None, 
+                'attribute': 'size',
+                'verbose': None,
                 'variant': {
-                    'vendor_metric': None, 
-                    'metric_verbose_name': { 'foo': { 'baaz': ['Large'] } }
-                }, 
-                'foo': { 'baaz': '' },
+                    'vendor_metric': None,
+                    'metric_verbose_name': {'foo': {'baaz': ['Large']}}
+                },
+                'foo': {'baaz': ''},
                 'logo': 235
             }
         ]
@@ -97,5 +96,3 @@ class TestViewTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data, expected_output)
-
-

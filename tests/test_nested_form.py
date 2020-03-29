@@ -5,7 +5,7 @@ from django.http import QueryDict
 from drf_nested_formdata.utils import NestedForm
 
 
-class NestedFormTestCase(unittest.TestCase):     
+class NestedFormTestCase(unittest.TestCase):
 
     def test_data_1(self):
 
@@ -25,32 +25,31 @@ class NestedFormTestCase(unittest.TestCase):
 
         expected_output = [
             {
-                'attribute': 'size', 
-                'verbose': ['bazz', 'foo'], 
+                'attribute': 'size',
+                'verbose': ['bazz', 'foo'],
                 'variant': {
-                    'vendor_metric': 456, 
+                    'vendor_metric': 456,
                     'metric_verbose_name': 'Large'
-                }, 
-                'foo': { 'baaz': 'ggg' }
-            }, 
+                },
+                'foo': {'baaz': 'ggg'}
+            },
             {
-                'attribute': 'size', 
-                'verbose': 'size', 
+                'attribute': 'size',
+                'verbose': 'size',
                 'variant': {
-                    'vendor_metric': 'L', 
-                    'metric_verbose_name': { 'foo': { 'baaz': ['Large'] } }
-                }, 
-                'foo': { 'baaz': True }
+                    'vendor_metric': 'L',
+                    'metric_verbose_name': {'foo': {'baaz': ['Large']}}
+                },
+                'foo': {'baaz': True}
             }
         ]
-    
+
         form = NestedForm(data_1)
         form.is_valid(raise_exception=True)
-        
+
         self.assertEqual(len(form.data), 2)
         self.assertEqual(form.data, expected_output)
 
-    
     def test_data_2(self):
         """
         a non nested data will not run
@@ -87,7 +86,6 @@ class NestedFormTestCase(unittest.TestCase):
         self.assertTrue(form.is_valid())
         self.assertEqual(form.data, expected_output)
 
-
     def test_data_4(self):
         """
         test support for namespace if provided
@@ -105,23 +103,23 @@ class NestedFormTestCase(unittest.TestCase):
         expected_output = {
             'item': {
                 'attribute': [
-                    {'user_type': 'size'}, 
+                    {'user_type': 'size'},
                     {'user_type': ''}
-                ], 
-                'verbose': [''], 
+                ],
+                'verbose': [''],
                 'variant': {
-                    'vendor_metric': None, 
+                    'vendor_metric': None,
                     'metric_verbose_name': 'Large'
-                }, 
-                'foo': { 'baaz': None }
-                }
+                },
+                'foo': {'baaz': None}
             }
+        }
 
         options = {
             'allow_blank': True,
             'allow_empty': False
         }
-        
+
         form = NestedForm(data_4, **options)
         form.is_valid(raise_exception=True)
 
@@ -143,14 +141,14 @@ class NestedFormTestCase(unittest.TestCase):
                 'attribute': [
                     {'user_type': 'size'},
                     None,
-                    None, 
+                    None,
                     {'user_type': 'color'},
                     None,
                     None,
                     {'user_type': 'length'}
-                    ]
-                }
+                ]
             }
+        }
 
         form = NestedForm(data_5)
         form.is_valid(raise_exception=True)
@@ -168,10 +166,10 @@ class NestedFormTestCase(unittest.TestCase):
 
         expected_output = {
             'item': {
-                'verbose':[{
-                        'user_type_1': 'seller', 
-                        'user_type_2': 'buyer'
-                    }]
+                'verbose': [{
+                    'user_type_1': 'seller',
+                    'user_type_2': 'buyer'
+                }]
             }
         }
 
@@ -209,40 +207,40 @@ class NestedFormTestCase(unittest.TestCase):
 
         expected_output = {
             'item': {
-                    'attribute': [
-                        {'user_type': 'size'}, 
-                        {'user_type': 'color'}
-                    ], 
-                    'verbose': [None], 
-                    'variant': {
-                        'vendor_metric': 'Lego', 
-                        'metric_verbose_name': 'Large'
-                    }, 
-                    'foo': {'baaz': None}
+                'attribute': [
+                    {'user_type': 'size'},
+                    {'user_type': 'color'}
+                ],
+                'verbose': [None],
+                'variant': {
+                    'vendor_metric': 'Lego',
+                    'metric_verbose_name': 'Large'
                 },
+                'foo': {'baaz': None}
+            },
             'next': {
-                    'attribute': [
-                        {'user_type': 'people'}, 
-                        {'user_type': 'color'}
-                        ], 
-                    'verbose': [None], 
-                    'variant': {
-                        'vendor_metric': 'Leggit', 
-                        'metric_verbose_name': 'Large'
-                    }, 
-                    'foo': { 'baaz': None }
+                'attribute': [
+                    {'user_type': 'people'},
+                    {'user_type': 'color'}
+                ],
+                'verbose': [None],
+                'variant': {
+                    'vendor_metric': 'Leggit',
+                    'metric_verbose_name': 'Large'
                 },
+                'foo': {'baaz': None}
+            },
             'variant': ['color'],
             '': [{
-                    'attribute': 'size', 
-                    'verbose': ['bazz', 'foo'], 
-                    'variant': {
-                        'vendor_metric': 456, 
-                        'metric_verbose_name': 'Large'
-                    }, 
-                    'foo': {'baaz': 'ggg'}
-                }]
-            }
+                'attribute': 'size',
+                'verbose': ['bazz', 'foo'],
+                'variant': {
+                    'vendor_metric': 456,
+                    'metric_verbose_name': 'Large'
+                },
+                'foo': {'baaz': 'ggg'}
+            }]
+        }
 
         form = NestedForm(data_7)
         form.is_valid(raise_exception=True)
@@ -261,7 +259,7 @@ class NestedFormTestCase(unittest.TestCase):
 
         expected_output = {
             'variant': ['color', 'size'],
-            'verbose': ['bazz', 'foo'] 
+            'verbose': ['bazz', 'foo']
         }
 
         form = NestedForm(data_8)

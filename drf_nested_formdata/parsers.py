@@ -25,7 +25,7 @@ class NestedMultiPartParser(MultiPartParser):
 
         if form.is_valid():
             return form.data
-        
+
         return parsed
 
 
@@ -42,6 +42,5 @@ class NestedJSONParser(JSONParser):
 
         if form.is_valid():
             return form.data
-        
-        return parsed
 
+        return parsed

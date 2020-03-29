@@ -26,8 +26,3 @@ ROOT_URLCONF = 'tests.urls'
 RESTFRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
 }
-
-
-
-
-
