@@ -1,1 +1,1 @@
-
+include *.txt *.cfg, *.md, *ini
