@@ -18,10 +18,6 @@ matrix:
     - name: "Django 1.11"
       env:
         - DJANGO="django==1.11.27"
-    - name: "Python 3.5, Django 2.2"
-      python: "3.5"
-      env:
-        - DJANGO="django==2.2.9"
     - name: "Python 3.4, Django 2.0, DRF 3.9"
       python: "3.4"
       env:
