@@ -202,7 +202,7 @@ data = [
 # Tests
 
 ```
-py runtests.py
+python runtests.py
 ```
 
 # Author
