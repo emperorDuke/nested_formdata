@@ -18,16 +18,6 @@ matrix:
     - name: "Django 1.11"
       env:
         - DJANGO="django==1.11.27"
-    - name: "Python 3.4, Django 2.0, DRF 3.9"
-      python: "3.4"
-      env:
-        - DJANGO="django==2.0.13"
-        - DRF="djangorestframework==3.9.4"
-    - name: "Python 2.7, Django 1.8, DRF 3.6"
-      python: "2.7"
-      env:
-        - DJANGO="django==1.8.19"
-        - DRF="djangorestframework==3.6.4"
 
 install: pip install -r requirements.txt
 
