@@ -22,4 +22,3 @@ matrix:
 install: pip install -r requirements.txt
 
 script: python runtests.py
-
