@@ -2,7 +2,7 @@ import unittest
 
 from django.http import QueryDict
 
-from drf_nested_formdata.utils import NestedForm
+from drf_nested_form.utils import NestedForm
 
 
 class NestedFormTestCase(unittest.TestCase):

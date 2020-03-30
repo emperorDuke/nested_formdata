@@ -23,7 +23,7 @@ The utiliy class can be used directly in any part of the code.
 
 ```python
 
-from drf_nested_formdata.utils import NestedForm
+from drf_nested_form.utils import NestedForm
 
 data = {
     'item[attribute][0][user_type]': 'size',
@@ -127,7 +127,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 
-from drf_nested_formdata.parsers import NestedMultiPartParser, NestedJSONParser
+from drf_nested_form.parsers import NestedMultiPartParser, NestedJSONParser
 
 class TestMultiPartParserView(APIView):
     parser_classes = (NestedMultiPartParser, FormParser)
