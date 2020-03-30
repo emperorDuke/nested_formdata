@@ -1,7 +1,7 @@
 # DRF NESTED FORM
 
 A library that parses nested json or form data to python object.
-
+[![Build Status](https://travis-ci.com/emperorDuke/nested_formdata.svg?branch=master)](https://travis-ci.com/emperorDuke/nested_formdata)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/emperorDuke/nested_formdata)](https://github.com/emperorDuke/nested_formdata/releases)
 [![PyPI - License](https://img.shields.io/pypi/l/drf_nested_form)](https://pypi.python.org/pypi/drf-nested-form)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/drf_nested_form)](https://pypi.python.org/pypi/drf-nested-form)
