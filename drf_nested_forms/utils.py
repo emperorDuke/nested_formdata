@@ -114,7 +114,7 @@ class NestedForms(Base):
         """
         Initiates the conversion process and packages the final data
         """
-        data_list, build, top = self.pre_process_data(), {}, []
+        data_list, final_build, top_wrapper = self.pre_process_data(), {}, []
 
         for data in data_list:
             key = list(data.keys())[0]
@@ -126,22 +126,22 @@ class NestedForms(Base):
                 # although it support having different data structure
                 # it is not recommended.
                 if isinstance(root_tree, dict):
-                    build.update(root_tree)
+                    final_build.update(root_tree)
                 elif isinstance(root_tree, list):
-                    if build:
-                        build[''] = root_tree
+                    if final_build:
+                        final_build[''] = root_tree
                     else:
-                        top.append(root_tree)
+                        top_wrapper.append(root_tree)
             else:
-                build.setdefault(key, root_tree)
+                final_build.setdefault(key, root_tree)
 
-        if build:
-            top.append(build)
+        if final_build:
+            top_wrapper.append(final_build)
 
-        if len(top) == 1:
-            setattr(self, '_final_data', top[0])
-        elif len(top) > 1:
-            setattr(self, '_final_data', top)
+        if len(top_wrapper) == 1:
+            setattr(self, '_final_data', top_wrapper[0])
+        elif len(top_wrapper) > 1:
+            setattr(self, '_final_data', top_wrapper)
         else:
             raise ParseError('unexpected empty container')
 
@@ -177,7 +177,7 @@ class NestedForms(Base):
 
         return self._root_tree
 
-    def generate_structure(self, root, context, depth=0):
+    def build(self, root, context, depth=0):
         """
         Insert and updates the root tree according to the context passed as
         argument
@@ -240,7 +240,7 @@ class NestedForms(Base):
             # if not depth of interest unpack the root object with keys
             # provided by context['keys']
             key = context['keys'][depth]
-            self.generate_structure(root[key], context, depth=depth + 1)
+            self.build(root[key], context, depth=depth + 1)
 
     def generate_context(self, key, value, root_tree):
         """
@@ -291,7 +291,7 @@ class NestedForms(Base):
                 'keys': get_index_keys(prev_i)
             }
 
-            self.generate_structure(root_tree, context)
+            self.build(root_tree, context)
 
     def pre_process_data(self):
         """
