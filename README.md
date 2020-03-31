@@ -1,4 +1,4 @@
-# DRF NESTED FORM
+# DRF NESTED FORMS
 
 A library that parses nested json or form data to python object.
 
@@ -15,7 +15,7 @@ SPA's, sometimes send nested form data or json as requests encoded by some javas
 # Installation
 
 ```
-pip install drf_nested_form
+pip install drf_nested_forms
 ```
 
 # Usage
@@ -24,7 +24,7 @@ The utiliy class can be used directly in any part of the code.
 
 ```python
 
-from drf_nested_form.utils import NestedForm
+from drf_nested_forms.utils import NestedForms
 
 data = {
     'item[attribute][0][user_type]': 'size',
@@ -43,11 +43,11 @@ options = {
 
 ## Note
 
-`.is_valid()` should be called before accessing the `.data`
+`.is_nested()` should be called before accessing the `.data`
 
 ```python
-form = NestedForm(data, **options)
-form.is_valid(raise_exception=True)
+form = NestedForms(data, **options)
+form.is_nested(raise_exception=True)
 ```
 
 The parsed result will look like below:
@@ -91,8 +91,8 @@ REST_FRAMEWORK = {
         # nested parser are just default DRF parsers with extended
         # functionalities to support nested
 
-        'drf_nested_formdata.parsers.NestedMultiPartParser,
-        'drf_nested_formdata.parsers.NestedJSONPartParser,
+        'drf_nested_forms.parsers.NestedMultiPartParser,
+        'drf_nested_forms.parsers.NestedJSONPartParser,
         'rest_framework.parsers.FormParser',
 
         # so this settings will work in respective of a nested request
@@ -128,7 +128,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 
-from drf_nested_form.parsers import NestedMultiPartParser, NestedJSONParser
+from drf_nested_forms.parsers import NestedMultiPartParser, NestedJSONParser
 
 class TestMultiPartParserView(APIView):
     parser_classes = (NestedMultiPartParser, FormParser)

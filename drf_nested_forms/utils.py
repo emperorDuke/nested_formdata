@@ -36,7 +36,7 @@ class Base(UtilityMixin):
         Returns the final build
         """
         if not hasattr(self, '_final_data'):
-            msg = '`.is_valid()` has to be called before accessing `.data`'
+            msg = '`.is_nested()` has to be called before accessing `.data`'
             raise AssertionError(msg)
 
         return self._final_data
@@ -44,7 +44,7 @@ class Base(UtilityMixin):
     @property
     def validated_data(self):
         if not hasattr(self, '_validated_data'):
-            msg = '`.is_valid()` has to be called before accessing `.data`'
+            msg = '`.is_nested()` has to be called before accessing `.data`'
             raise AssertionError(msg)
 
         return self._validated_data
@@ -52,9 +52,9 @@ class Base(UtilityMixin):
     def serialize(self, validated_data):
         raise NotImplementedError('`serialize()` is not implemented')
 
-    def is_valid(self, raise_exception=False):
+    def is_nested(self, raise_exception=False):
         """
-        Checks if the initial_data data is a dict and a nested object
+        Checks if the initial_data map is a nested object
         """
 
         if hasattr(self._initial_data, 'getlist'):
@@ -69,7 +69,7 @@ class Base(UtilityMixin):
                 raise ValueError(msg)
         else:
             matched_keys = [
-                bool(self.is_nested(key))
+                bool(self.is_nested_string(key))
                 for key in self._initial_data.keys()
             ]
 
@@ -102,7 +102,7 @@ class Base(UtilityMixin):
 # serilizes a nested form data to object
 # ---------------------------------------
 
-class NestedForm(Base):
+class NestedForms(Base):
     """
     Serialize nested forms into python object
     """
@@ -156,7 +156,7 @@ class NestedForm(Base):
         key = list(validated_data.keys())[0]
 
         if self._root_tree is None:
-            if self.is_nested(key):
+            if self.is_nested_string(key):
                 key = self.strip_namespace(key)
                 self._root_tree = self.get_container(key)
             else:
@@ -165,7 +165,7 @@ class NestedForm(Base):
         #########################################################
 
         for key, value in validated_data.items():
-            if self.is_nested(key):
+            if self.is_nested_string(key):
                 key = self.strip_namespace(key)
                 value = self.replace_specials(value)
 

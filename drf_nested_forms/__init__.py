@@ -8,5 +8,5 @@ __copyright__ = 'Copyright 2020'
 from .exceptions import ParseError
 from .parsers import NestedMultiPartParser, NestedJSONParser
 from .mixins import UtilityMixin
-from .utils import NestedForm
+from .utils import NestedForms
 VERSION = __version__

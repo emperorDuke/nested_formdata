@@ -14,7 +14,7 @@ def get_version(package):
     return re.search("__version__ = ['\"]([^'\"]+)['\"]", init_py).group(1)
 
 
-version = get_version('drf_nested_form')
+version = get_version('drf_nested_forms')
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,7 +23,7 @@ with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setup(
-    name='drf_nested_form',
+    name='drf_nested_forms',
     version=version,
     url='http://github.com/emperorDuke/nested_formdata',
     download_url='http://github.com/emperorDuke/nested_formdata/archive/v0.2.0.tar.gz',
@@ -31,10 +31,10 @@ setup(
     description='A library that parses nested json or form data to python object',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    keywords=['drf', 'nested_form', 'drf_nested_form', 'restframework', 'nested json'],
+    keywords=['drf', 'nested_form', 'html_forms' 'drf_nested_forms', 'restframework', 'nested json'],
     author='Duke Effiom',
     author_email='effiomduke@gmail.com',
-    packages=['drf_nested_form'],
+    packages=['drf_nested_forms'],
     zip_safe=False,
     classifiers=[
         'Environment :: Web Environment',

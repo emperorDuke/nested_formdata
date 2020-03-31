@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import FormParser
 from rest_framework.response import Response
 
-from drf_nested_form.parsers import NestedMultiPartParser, NestedJSONParser
+from drf_nested_forms.parsers import NestedMultiPartParser, NestedJSONParser
 
 
 class TestViewMultiPart(APIView):

@@ -2,7 +2,7 @@ import unittest
 
 from django.http import QueryDict
 
-from drf_nested_form.utils import NestedForm
+from drf_nested_forms.utils import NestedForms
 
 
 class NestedFormTestCase(unittest.TestCase):
@@ -44,8 +44,8 @@ class NestedFormTestCase(unittest.TestCase):
             }
         ]
 
-        form = NestedForm(data_1)
-        form.is_valid(raise_exception=True)
+        form = NestedForms(data_1)
+        form.is_nested(raise_exception=True)
 
         self.assertEqual(len(form.data), 2)
         self.assertEqual(form.data, expected_output)
@@ -60,9 +60,9 @@ class NestedFormTestCase(unittest.TestCase):
             'variant': 'color',
         }
 
-        form = NestedForm(data_2)
+        form = NestedForms(data_2)
 
-        self.assertFalse(form.is_valid())
+        self.assertFalse(form.is_nested())
 
     def test_data_3(self):
         """
@@ -81,9 +81,9 @@ class NestedFormTestCase(unittest.TestCase):
             'variant': ['color']
         }
 
-        form = NestedForm(data_3)
+        form = NestedForms(data_3)
 
-        self.assertTrue(form.is_valid())
+        self.assertTrue(form.is_nested())
         self.assertEqual(form.data, expected_output)
 
     def test_data_4(self):
@@ -120,8 +120,8 @@ class NestedFormTestCase(unittest.TestCase):
             'allow_empty': False
         }
 
-        form = NestedForm(data_4, **options)
-        form.is_valid(raise_exception=True)
+        form = NestedForms(data_4, **options)
+        form.is_nested(raise_exception=True)
 
         self.assertTrue(isinstance(form.data['item'], dict))
         self.assertEqual(form.data, expected_output)
@@ -150,8 +150,8 @@ class NestedFormTestCase(unittest.TestCase):
             }
         }
 
-        form = NestedForm(data_5)
-        form.is_valid(raise_exception=True)
+        form = NestedForms(data_5)
+        form.is_nested(raise_exception=True)
 
         self.assertEqual(form.data, expected_output)
 
@@ -173,8 +173,8 @@ class NestedFormTestCase(unittest.TestCase):
             }
         }
 
-        form = NestedForm(data_6)
-        form.is_valid(raise_exception=True)
+        form = NestedForms(data_6)
+        form.is_nested(raise_exception=True)
 
         self.assertEqual(form.data, expected_output)
 
@@ -242,8 +242,8 @@ class NestedFormTestCase(unittest.TestCase):
             }]
         }
 
-        form = NestedForm(data_7)
-        form.is_valid(raise_exception=True)
+        form = NestedForms(data_7)
+        form.is_nested(raise_exception=True)
 
         self.assertEqual(form.data, expected_output)
 
@@ -262,7 +262,7 @@ class NestedFormTestCase(unittest.TestCase):
             'verbose': ['bazz', 'foo']
         }
 
-        form = NestedForm(data_8)
-        form.is_valid(raise_exception=True)
+        form = NestedForms(data_8)
+        form.is_nested(raise_exception=True)
 
         self.assertEqual(form.data, expected_output)

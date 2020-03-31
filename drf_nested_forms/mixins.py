@@ -60,8 +60,7 @@ class UtilityMixin(object):
     def is_empty_dict(self, string=''):
         return bool(self._empty_dict_re.fullmatch(string))
 
-    def is_nested(self, string=''):
-
+    def is_nested_string(self, string=''):
         condition = [
             bool(pattern.fullmatch(string))
             for pattern in self._nested_re
