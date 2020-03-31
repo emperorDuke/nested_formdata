@@ -226,7 +226,7 @@ class NestedForms(Base):
                         for key in context['value'].keys():
                             # if the key already exist do nothing
                             if key in value:
-                                return
+                                continue
                             else:
                                 # transfer all the value to the root or value
                                 value.update(context['value'])
