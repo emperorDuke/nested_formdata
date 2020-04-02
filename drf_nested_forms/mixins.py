@@ -3,24 +3,13 @@ import re
 # Nested Form data deserializer utility class
 # --------------------------------------------
 
-
 class UtilityMixin(object):
 
-    _nested_re = (
-        re.compile(r'(.+)((\[(.*)\])+)'),
-        re.compile(r'(\[(.*)\]){2,}')
-    )
+    _nested_re = re.compile(r'((.+)\[(.*)\]+)|(\[(.*)\]{2,})')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
-    _list_re = re.compile(r'\[([0-9]{1,3})\]')
-    _number_re = re.compile(r'[\0-9]+')
-    _empty_list_re = re.compile(r'\[\]')
-    _empty_dict_re = re.compile(r'\{\}')
-    _dict_re = (
-        re.compile(r'\[([^0-9]+)\]'),
-        re.compile(r'\[([^0-9].)\]'),
-        re.compile(r'\[(.[^0-9])\]'),
-        re.compile(r'\[([\w]{4,})\]')
-    )
+    _list_re = re.compile(r'\[([0-9]+)\]')
+    _number_re = re.compile(r'[0-9]+')
+    _dict_re = re.compile(r'\[(([^A-Za-z]*)([^0-9]+)([0-9]*))+\]')
 
     @staticmethod
     def strip_bracket(string=''):
@@ -28,25 +17,22 @@ class UtilityMixin(object):
 
     @staticmethod
     def split(string=''):
-        """
-        Split the formData key into substrings
-        """
         subkeys = [key + ']' for key in string.split(']') if key is not '']
 
         assert len(subkeys) > 0, ('Cannot split this key `%s`' % (string))
 
         return subkeys
 
-    def is_dict(self, string=''):
-        """
-        Checks if the string passed is a dict object
-        """
-        condition = [
-            bool(pattern.fullmatch(string))
-            for pattern in self._dict_re
-        ]
+    @staticmethod
+    def is_empty_list(string=''):
+        return string == '[]'
 
-        return any(condition)
+    @staticmethod
+    def is_empty_dict(string=''):
+        return string == '{}'
+
+    def is_dict(self, string=''):
+        return bool(self._dict_re.fullmatch(string))
 
     def is_list(self, string=''):
         return bool(self._list_re.fullmatch(string))
@@ -54,19 +40,8 @@ class UtilityMixin(object):
     def is_number(self, string=''):
         return bool(self._number_re.fullmatch(string))
 
-    def is_empty_list(self, string=''):
-        return bool(self._empty_list_re.fullmatch(string))
-
-    def is_empty_dict(self, string=''):
-        return bool(self._empty_dict_re.fullmatch(string))
-
     def is_nested_string(self, string=''):
-        condition = [
-            bool(pattern.fullmatch(string))
-            for pattern in self._nested_re
-        ]
-
-        return any(condition)
+        return bool(self._nested_re.fullmatch(string))
 
     def is_namespaced(self, string=''):
         return bool(self._namespace_re.match(string))
@@ -135,14 +110,18 @@ class UtilityMixin(object):
         It return the appropiate container `[]`|`{}`
         based on the key provided
         """
-        sub_keys = self.split(key)
+        if self.is_nested_string(key):
+            key = self.strip_namespace(key)
+            sub_keys = self.split(key)
 
-        if self.is_list(sub_keys[index]):
-            return []
-        elif self.is_dict(sub_keys[index]):
-            return {}
+            if self.is_list(sub_keys[index]):
+                return []
+            elif self.is_dict(sub_keys[index]):
+                return {}
+            else:
+                return None
         else:
-            return None
+            return {}
 
     def is_last(self, current_key, data, is_type_of):
         """

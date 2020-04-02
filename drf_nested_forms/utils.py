@@ -14,9 +14,15 @@ class Base(UtilityMixin):
         self._allow_empty = kwargs.get('allow_empty', False)
         self._allow_blank = kwargs.get('allow_blank', True)
 
+    def __pre_process_data__(self):
+        pass
+
+    def __process__(self):
+        pass
+
     def __run__(self):
         if not hasattr(self, '_has_ran'):
-            self.process()
+            self.__process__()
             setattr(self, '_has_ran', True)
 
     def __create_raw_data__(self):
@@ -49,16 +55,15 @@ class Base(UtilityMixin):
 
         return self._validated_data
 
-    def serialize(self, validated_data):
-        raise NotImplementedError('`serialize()` is not implemented')
+    def decode(self, validated_data):
+        raise NotImplementedError('`decode()` is not implemented')
 
     def is_nested(self, raise_exception=False):
         """
         Checks if the initial_data map is a nested object
         """
-
         if hasattr(self._initial_data, 'getlist'):
-            # if true then it is a QueryDict
+            # if true then it is a MultivalueDict
             self.__create_raw_data__()
 
         conditions = [isinstance(self._initial_data, Mapping)]
@@ -104,23 +109,61 @@ class Base(UtilityMixin):
 
 class NestedForms(Base):
     """
-    Serialize nested forms into python object
+    decode nested forms into python object
     """
 
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
 
-    def process(self):
+    def __pre_process_data__(self):
+        """
+        It groups data structures of the same kind and namespaces together
+        """
+        temp, container, data = {}, [], self.validated_data
+
+        for key, value in data.items():
+            if self.is_namespaced(key):
+                if self.is_last(key, data, 'N'):
+                    temp.setdefault(key, value)
+                    container.append({self.get_namespace(key): temp})
+                    temp = {}
+                else:
+                    temp.setdefault(key, value)
+            elif self.is_list(self.split(key)[0]):
+                if self.is_last(key, data, 'L'):
+                    temp.setdefault(key, value)
+                    container.append({'': temp})
+                    temp = {}
+                else:
+                    temp.setdefault(key, value)
+            elif self.is_dict(self.split(key)[0]):
+                if self.is_last(key, data, 'D'):
+                    temp.setdefault(key, value)
+                    container.append({'': temp})
+                    temp = {}
+                else:
+                    temp.setdefault(key, value)
+            else:
+                if self.is_last(key, data, 'O'):
+                    temp.setdefault(key, value)
+                    container.append({'': temp})
+                    temp = {}
+                else:
+                    temp.setdefault(key, value)
+
+        return container
+
+    def __process__(self):
         """
         Initiates the conversion process and packages the final data
         """
-        data_list, final_build, top_wrapper = self.pre_process_data(), {}, []
+        data_list, final_build, top_wrapper = self.__pre_process_data__(), {}, []
 
         for data in data_list:
             key = list(data.keys())[0]
             value = list(data.values())[0]
 
-            root_tree = self.serialize(value)
+            root_tree = self.decode(value)
 
             if not bool(key):
                 # although it support having different data structure
@@ -145,7 +188,7 @@ class NestedForms(Base):
         else:
             raise ParseError('unexpected empty container')
 
-    def serialize(self, validated_data):
+    def decode(self, validated_data):
         """
         Convert validated_data to an object containing primitives
         """
@@ -153,14 +196,9 @@ class NestedForms(Base):
 
         ############# initialize the root_tree ###################
 
-        key = list(validated_data.keys())[0]
-
         if self._root_tree is None:
-            if self.is_nested_string(key):
-                key = self.strip_namespace(key)
-                self._root_tree = self.get_container(key)
-            else:
-                self._root_tree = {}
+            key = list(validated_data.keys())[0]
+            self._root_tree = self.get_container(key)
 
         #########################################################
 
@@ -292,41 +330,3 @@ class NestedForms(Base):
             }
 
             self.build(root_tree, context)
-
-    def pre_process_data(self):
-        """
-        It groups data structures of the same kind and namespaces together
-        """
-        temp, container, data = {}, [], self.validated_data
-
-        for key, value in data.items():
-            if self.is_namespaced(key):
-                if self.is_last(key, data, 'N'):
-                    temp.setdefault(key, value)
-                    container.append({self.get_namespace(key): temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
-            elif self.is_list(self.split(key)[0]):
-                if self.is_last(key, data, 'L'):
-                    temp.setdefault(key, value)
-                    container.append({'': temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
-            elif self.is_dict(self.split(key)[0]):
-                if self.is_last(key, data, 'D'):
-                    temp.setdefault(key, value)
-                    container.append({'': temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
-            else:
-                if self.is_last(key, data, 'O'):
-                    temp.setdefault(key, value)
-                    container.append({'': temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
-
-        return container
