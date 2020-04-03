@@ -166,8 +166,6 @@ class NestedForms(Base):
             root_tree = self.decode(value)
 
             if not bool(key):
-                # although it support having different data structure
-                # it is not recommended.
                 if isinstance(root_tree, dict):
                     final_build.update(root_tree)
                 elif isinstance(root_tree, list):
