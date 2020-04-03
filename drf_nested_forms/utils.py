@@ -14,27 +14,13 @@ class Base(UtilityMixin):
         self._allow_empty = kwargs.get('allow_empty', False)
         self._allow_blank = kwargs.get('allow_blank', True)
 
-    def __pre_process_data__(self):
-        pass
-
     def __process__(self):
-        pass
+        raise NotImplementedError('`__process__()` is not implemented')
 
     def __run__(self):
         if not hasattr(self, '_has_ran'):
             self.__process__()
             setattr(self, '_has_ran', True)
-
-    def __create_raw_data__(self):
-        raw_data = {}
-
-        for key, value in dict(self._initial_data).items():
-            if len(value) > 1:
-                raw_data[key] = value
-            else:
-                raw_data[key] = value[0]
-
-        self._initial_data = raw_data
 
     @property
     def data(self):
@@ -55,40 +41,45 @@ class Base(UtilityMixin):
 
         return self._validated_data
 
-    def decode(self, validated_data):
-        raise NotImplementedError('`decode()` is not implemented')
-
     def is_nested(self, raise_exception=False):
         """
         Checks if the initial_data map is a nested object
         """
         if hasattr(self._initial_data, 'getlist'):
-            # if true then it is a MultivalueDict
-            self.__create_raw_data__()
+            # if true then it is a MultivalueDict]
+            
+            raw_data = {}
 
-        conditions = [isinstance(self._initial_data, Mapping)]
+            for key, value in dict(self._initial_data).items():
+                if len(value) > 1:
+                    raw_data[key] = value
+                else:
+                    raw_data[key] = value[0]
 
-        if not isinstance(self._initial_data, Mapping):
-            msg = '`data` is not a map type'
-            if raise_exception:
-                raise ValueError(msg)
+            self._initial_data = raw_data
+
+        #############################################################
+
+        is_mapping = isinstance(self._initial_data, Mapping)
+        conditions = [is_mapping]
+
+        if not is_mapping and raise_exception:
+            raise ValueError('`data` is not a map type')
         else:
             matched_keys = [
                 bool(self.is_nested_string(key))
                 for key in self._initial_data.keys()
             ]
 
-            conditions.append(any(matched_keys))
+            conditions += [any(matched_keys)]
 
-            if not any(matched_keys):
-                msg = '`data` is not a nested type'
-                if raise_exception:
-                    raise ValueError(msg)
+            if not any(matched_keys) and raise_exception:
+                raise ValueError('`data` is not a nested type')
             else:
                 self._validated_data = self._initial_data
                 self.__run__()
 
-            return all(conditions)
+        return all(conditions)
 
     def clean_value(self, value, default=None):
         """
@@ -115,7 +106,40 @@ class NestedForms(Base):
     def __init__(self, data, *args, **kwargs):
         super().__init__(data, *args, **kwargs)
 
-    def __pre_process_data__(self):
+    def __process__(self):
+        """
+        Initiates the conversion process and packages the final data
+        """
+        data_list, final_build, top_wrapper = self._group_data(), {}, []
+
+        for data in data_list:
+            key = list(data.keys())[0]
+            value = list(data.values())[0]
+
+            root_tree = self.decode(value)
+
+            if not bool(key):
+                if isinstance(root_tree, dict):
+                    final_build.update(root_tree)
+                elif isinstance(root_tree, list):
+                    if final_build:
+                        final_build[''] = root_tree
+                    else:
+                        top_wrapper.append(root_tree)
+            else:
+                final_build.setdefault(key, root_tree)
+
+        if final_build:
+            top_wrapper.append(final_build)
+
+        if len(top_wrapper) == 1:
+            self._final_data = top_wrapper[0]
+        elif len(top_wrapper) > 1:
+            self._final_data = top_wrapper
+        else:
+            raise ParseError('unexpected empty container')
+
+    def _group_data(self):
         """
         It groups data structures of the same kind and namespaces together
         """
@@ -152,39 +176,6 @@ class NestedForms(Base):
                     temp.setdefault(key, value)
 
         return container
-
-    def __process__(self):
-        """
-        Initiates the conversion process and packages the final data
-        """
-        data_list, final_build, top_wrapper = self.__pre_process_data__(), {}, []
-
-        for data in data_list:
-            key = list(data.keys())[0]
-            value = list(data.values())[0]
-
-            root_tree = self.decode(value)
-
-            if not bool(key):
-                if isinstance(root_tree, dict):
-                    final_build.update(root_tree)
-                elif isinstance(root_tree, list):
-                    if final_build:
-                        final_build[''] = root_tree
-                    else:
-                        top_wrapper.append(root_tree)
-            else:
-                final_build.setdefault(key, root_tree)
-
-        if final_build:
-            top_wrapper.append(final_build)
-
-        if len(top_wrapper) == 1:
-            self._final_data = top_wrapper[0]
-        elif len(top_wrapper) > 1:
-            self._final_data = top_wrapper
-        else:
-            raise ParseError('unexpected empty container')
 
     def decode(self, validated_data):
         """
