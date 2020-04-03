@@ -123,7 +123,7 @@ class UtilityMixin(object):
         else:
             return {}
 
-    def is_last(self, current_key, data, is_type_of):
+    def is_last(self, current_key, data, is_type_of='O'):
         """
         Checks if current key is the last in the data
         """

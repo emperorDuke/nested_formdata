@@ -160,8 +160,8 @@ class NestedFormTestCase(unittest.TestCase):
         test single object keys
         """
         data_6 = {
-            'item[verbose][0][user_type_1]': 'seller',
-            'item[verbose][0][user_type_2]': 'buyer',
+            'item[verbose][][user_type_1]': 'seller',
+            'item[verbose][][user_type_2]': 'buyer',
         }
 
         expected_output = {

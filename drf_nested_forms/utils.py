@@ -144,7 +144,7 @@ class NestedForms(Base):
                 else:
                     temp.setdefault(key, value)
             else:
-                if self.is_last(key, data, 'O'):
+                if self.is_last(key, data):
                     temp.setdefault(key, value)
                     container.append({'': temp})
                     temp = {}
@@ -182,9 +182,9 @@ class NestedForms(Base):
             top_wrapper.append(final_build)
 
         if len(top_wrapper) == 1:
-            setattr(self, '_final_data', top_wrapper[0])
+            self._final_data = top_wrapper[0]
         elif len(top_wrapper) > 1:
-            setattr(self, '_final_data', top_wrapper)
+            self._final_data = top_wrapper
         else:
             raise ParseError('unexpected empty container')
 
