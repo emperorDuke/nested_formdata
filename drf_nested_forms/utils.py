@@ -45,9 +45,11 @@ class Base(UtilityMixin):
         """
         Checks if the initial_data map is a nested object
         """
+
+        ###### Check if initial_data is a MultiValueDIct ############
+
         if hasattr(self._initial_data, 'getlist'):
-            # if true then it is a MultivalueDict]
-            
+
             raw_data = {}
 
             for key, value in dict(self._initial_data).items():
@@ -62,6 +64,8 @@ class Base(UtilityMixin):
 
         is_mapping = isinstance(self._initial_data, Mapping)
         conditions = [is_mapping]
+
+        #############################################################
 
         if not is_mapping and raise_exception:
             raise ValueError('`data` is not a map type')
