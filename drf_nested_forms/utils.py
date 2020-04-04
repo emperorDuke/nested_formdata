@@ -47,9 +47,9 @@ class Base(UtilityMixin):
         """
 
         ###### Check if initial_data is a MultiValueDIct ############
+        ###### Convert it to a dict object ##########################
 
         if hasattr(self._initial_data, 'getlist'):
-
             raw_data = {}
 
             for key, value in dict(self._initial_data).items():
@@ -71,7 +71,7 @@ class Base(UtilityMixin):
             raise ValueError('`data` is not a map type')
         else:
             matched_keys = [
-                bool(self.is_nested_string(key))
+                self.is_nested_string(key)
                 for key in self._initial_data.keys()
             ]
 
