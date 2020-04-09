@@ -87,9 +87,11 @@ class Base(UtilityMixin):
 
         if not any(matched_keys) and raise_exception:
             raise ValueError('`data` is not a nested type')
-        else:
-            self._validated_data = self._initial_data
-            self.__run__()
+
+        #############################################################
+        
+        self._validated_data = self._initial_data
+        self.__run__()
 
         return all(conditions)
 
