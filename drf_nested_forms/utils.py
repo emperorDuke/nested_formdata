@@ -69,19 +69,27 @@ class Base(UtilityMixin):
 
         if not is_mapping and raise_exception:
             raise ValueError('`data` is not a map type')
-        else:
-            matched_keys = [
-                self.is_nested_string(key)
-                for key in self._initial_data.keys()
-            ]
 
-            conditions += [any(matched_keys)]
+       ##############################################################
 
-            if not any(matched_keys) and raise_exception:
-                raise ValueError('`data` is not a nested type')
+        matched_keys = []
+
+        for key in self._initial_data.keys():
+            if self.is_nested_string(key):
+                matched_keys.append(True)
+                break
             else:
-                self._validated_data = self._initial_data
-                self.__run__()
+                matched_keys.append(False)
+
+        conditions += [any(matched_keys)]
+
+        #############################################################
+
+        if not any(matched_keys) and raise_exception:
+            raise ValueError('`data` is not a nested type')
+        else:
+            self._validated_data = self._initial_data
+            self.__run__()
 
         return all(conditions)
 
@@ -312,6 +320,7 @@ class NestedForms(Base):
         #########################################################
 
         for i, sub_key in enumerate(sub_keys):
+
             next_i = i + 1
             prev_i = i - 1
 
