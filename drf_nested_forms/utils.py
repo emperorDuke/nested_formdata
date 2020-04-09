@@ -115,9 +115,6 @@ class NestedForms(Base):
     decode nested forms into python object
     """
 
-    def __init__(self, data, *args, **kwargs):
-        super().__init__(data, *args, **kwargs)
-
     def __process__(self):
         """
         Initiates the conversion process and packages the final data
