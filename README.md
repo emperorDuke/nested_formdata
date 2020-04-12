@@ -13,6 +13,7 @@ A library that parses nested json or form data to python object.
 SPA's, sometimes send nested form data or json as requests encoded by some javascript libraries like [json-form-data](https://github.com/hyperatom/json-form-data#readme) which can be difficult to handle due to the key naming conventions. This library helps to eliminate that difficulty, by parsing that nested requests into a more predictable python object that can be used by libraries like [drf_writable_nested](https://github.com/beda-software/drf-writable-nested#readme) or used directly in the code.
 
 # Installation
+
 It is available via pypi:
 
 ```
