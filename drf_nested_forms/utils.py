@@ -5,9 +5,9 @@ from .mixins import UtilityMixin
 
 
 # Base serilizer for converting nested formdata to objects
-# ----------------------------------------------------------
+# ---------------------------------------------------------
 
-class Base(UtilityMixin):
+class BaseClass(UtilityMixin):
 
     def __init__(self, data, *args, **kwargs):
         self._initial_data = data
@@ -18,9 +18,8 @@ class Base(UtilityMixin):
         raise NotImplementedError('`__process__()` is not implemented')
 
     def __run__(self):
-        if not hasattr(self, '_has_ran'):
+        if not hasattr(self, '_final_data'):
             self.__process__()
-            setattr(self, '_has_ran', True)
 
     @property
     def data(self):
@@ -36,7 +35,7 @@ class Base(UtilityMixin):
     @property
     def validated_data(self):
         if not hasattr(self, '_validated_data'):
-            msg = '`.is_nested()` has to be called before accessing `.data`'
+            msg = '`.is_nested()` has to be called before accessing `.validated_data`'
             raise AssertionError(msg)
 
         return self._validated_data
@@ -70,7 +69,7 @@ class Base(UtilityMixin):
         if not is_mapping and raise_exception:
             raise ValueError('`data` is not a map type')
 
-       ##############################################################
+        #############################################################
 
         matched_keys = []
 
@@ -112,7 +111,7 @@ class Base(UtilityMixin):
 # serilizes a nested form data to object
 # ---------------------------------------
 
-class NestedForms(Base):
+class NestedForms(BaseClass):
     """
     decode nested forms into python object
     """
