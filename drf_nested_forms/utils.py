@@ -88,9 +88,10 @@ class BaseClass(UtilityMixin):
             raise ValueError('`data` is not a nested type')
 
         #############################################################
-        
-        self._validated_data = self._initial_data
-        self.__run__()
+
+        if all(conditions):
+            self._validated_data = self._initial_data
+            self.__run__()
 
         return all(conditions)
 
