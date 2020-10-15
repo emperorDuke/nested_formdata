@@ -93,8 +93,8 @@ REST_FRAMEWORK = {
         # nested parser are just default DRF parsers with extended
         # functionalities to support nested
 
-        'drf_nested_forms.parsers.NestedMultiPartParser,
-        'drf_nested_forms.parsers.NestedJSONPartParser,
+        'drf_nested_forms.parsers.NestedMultiPartParser',
+        'drf_nested_forms.parsers.NestedJSONPartParser',
         'rest_framework.parsers.FormParser',
 
         # so this settings will work in respective of a nested request
