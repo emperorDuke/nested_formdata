@@ -1,15 +1,17 @@
-from drf_nested_forms.exceptions import ParseException
 import unittest
 
 from django.http import QueryDict
 
 from drf_nested_forms.utils import NestedForms
+from drf_nested_forms.exceptions import ParseException
 
 
 class NestedFormTestCase(unittest.TestCase):
 
     def test_data_1(self):
-
+        """
+        list data
+        """
         data_1 = {
             '[0][attribute]': 'size',
             '[0][verbose][0]': 'bazz',
