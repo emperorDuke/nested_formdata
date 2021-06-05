@@ -1,2 +1,9 @@
-Django>=2.2
-djangorestframework>=3.10.3
+asgiref==3.3.4
+autopep8==1.5.7
+Django==3.2.4
+djangorestframework==3.12.4
+pycodestyle==2.7.0
+pytz==2021.1
+sqlparse==0.4.1
+toml==0.10.2
+upgrade-requirements==1.7.0

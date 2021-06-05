@@ -1,3 +1,4 @@
+from drf_nested_forms.exceptions import ParseException
 import unittest
 
 from django.http import QueryDict
@@ -13,7 +14,7 @@ class NestedFormTestCase(unittest.TestCase):
             '[0][attribute]': 'size',
             '[0][verbose][0]': 'bazz',
             '[0][verbose][1]': 'foo',
-            '[0][variant][vendor_metric]': '456',
+            '[0][variant][vendor_metric]': 456,
             '[0][variant][metric_verbose_name]': 'Large',
             '[0][foo][baaz]': 'ggg',
             '[1][attribute]': 'size',
@@ -162,13 +163,15 @@ class NestedFormTestCase(unittest.TestCase):
         data_6 = {
             'item[verbose][][user_type_1]': 'seller',
             'item[verbose][][user_type_2]': 'buyer',
+            'item[verbose][][user_type_3]': 'guest',
         }
 
         expected_output = {
             'item': {
                 'verbose': [{
                     'user_type_1': 'seller',
-                    'user_type_2': 'buyer'
+                    'user_type_2': 'buyer',
+                    'user_type_3': 'guest'
                 }]
             }
         }
@@ -266,3 +269,18 @@ class NestedFormTestCase(unittest.TestCase):
         form.is_nested(raise_exception=True)
 
         self.assertEqual(form.data, expected_output)
+
+    def test_data_9(self):
+        """
+        test that will will throw a too many consecutive empty arrays
+        """
+
+        data = {
+            'item[attribute][0][user_type]': 'size',
+            'item[attribute][3][user_type]': 'color',
+            'item[attribute][1005][user_type]': 'length',
+        }
+
+        with self.assertRaises(ParseException):
+            form = NestedForms(data)
+            form.is_nested(raise_exception=True)

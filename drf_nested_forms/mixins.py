@@ -3,8 +3,8 @@ import re
 # Nested Form data deserializer utility class
 # --------------------------------------------
 
-class UtilityMixin(object):
 
+class UtilityMixin(object):
     _nested_re = re.compile(r'((.+)\[(.*)\]+)|(\[(.*)\]{2,})')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
     _list_re = re.compile(r'\[([0-9]+)\]')
@@ -17,33 +17,33 @@ class UtilityMixin(object):
 
     @staticmethod
     def split(string=''):
-        subkeys = [key + ']' for key in string.split(']') if key is not '']
+        subkeys = [key + ']' for key in string.split(']') if key != '']
 
         assert len(subkeys) > 0, ('Cannot split this key `%s`' % (string))
 
         return subkeys
 
     @staticmethod
-    def is_empty_list(string=''):
+    def str_is_empty_list(string=''):
         return string == '[]'
 
     @staticmethod
-    def is_empty_dict(string=''):
+    def str_is_empty_dict(string=''):
         return string == '{}'
 
-    def is_dict(self, string=''):
+    def str_is_dict(self, string=''):
         return bool(self._dict_re.fullmatch(string))
 
-    def is_list(self, string=''):
+    def str_is_list(self, string=''):
         return bool(self._list_re.fullmatch(string))
 
-    def is_number(self, string=''):
+    def str_is_number(self, string=''):
         return bool(self._number_re.fullmatch(string))
 
-    def is_nested_string(self, string=''):
+    def str_is_nested_string(self, string=''):
         return bool(self._nested_re.fullmatch(string))
 
-    def is_namespaced(self, string=''):
+    def str_is_namespaced(self, string=''):
         return bool(self._namespace_re.match(string))
 
     def get_namespace(self, string=''):
@@ -96,11 +96,11 @@ class UtilityMixin(object):
             return True
         elif string == 'false':
             return False
-        elif self.is_number(string):
+        elif self.str_is_number(string):
             return int(string)
-        elif self.is_empty_list(string):
+        elif self.str_is_empty_list(string):
             return []
-        elif self.is_empty_dict(string):
+        elif self.str_is_empty_dict(string):
             return {}
         else:
             return string
@@ -110,20 +110,20 @@ class UtilityMixin(object):
         It return the appropiate container `[]`|`{}`
         based on the key provided
         """
-        if self.is_nested_string(key):
+        if self.str_is_nested_string(key):
             key = self.strip_namespace(key)
             sub_keys = self.split(key)
 
-            if self.is_list(sub_keys[index]):
+            if self.str_is_list(sub_keys[index]):
                 return []
-            elif self.is_dict(sub_keys[index]):
+            elif self.str_is_dict(sub_keys[index]):
                 return {}
             else:
                 return None
         else:
             return {}
 
-    def is_last(self, current_key, data, is_type_of='O'):
+    def key_is_last(self, current_key, data, is_type_of='non_nested'):
         """
         Checks if current key is the last in the data
         """
@@ -146,7 +146,7 @@ class UtilityMixin(object):
         def namespace():
             try:
                 next_key = keys[next_index]
-                if self.is_namespaced(next_key):
+                if self.str_is_namespaced(next_key):
                     current_namespace = self.get_namespace(current_key)
                     next_namespace = self.get_namespace(next_key)
 
@@ -163,10 +163,10 @@ class UtilityMixin(object):
 
         def ordinary():
             try:
-                if not self.is_namespaced(keys[next_index]):
+                if not self.str_is_namespaced(keys[next_index]):
                     next_k = self.split(keys[next_index])[0]
 
-                    if not self.is_list(next_k) and not self.is_dict(next_k):
+                    if not self.str_is_list(next_k) and not self.str_is_dict(next_k):
                         is_last = False
                     else:
                         is_last = True
@@ -177,11 +177,11 @@ class UtilityMixin(object):
 
             return is_last
 
-        if is_type_of == 'L':
-            return object_type(self.is_list)
-        elif is_type_of == 'N':
+        if is_type_of == 'list':
+            return object_type(self.str_is_list)
+        elif is_type_of == 'namespace':
             return namespace()
-        elif is_type_of == 'D':
-            return object_type(self.is_dict)
+        elif is_type_of == 'dict':
+            return object_type(self.str_is_dict)
         else:
             return ordinary()
