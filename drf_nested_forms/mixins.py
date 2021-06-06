@@ -16,7 +16,7 @@ class UtilityMixin(object):
         return string.replace('[', '').replace(']', '')
 
     @staticmethod
-    def split(string=''):
+    def split_nested_str(string=''):
         subkeys = [key + ']' for key in string.split(']') if key != '']
 
         assert len(subkeys) > 0, ('Cannot split this key `%s`' % (string))
@@ -40,7 +40,7 @@ class UtilityMixin(object):
     def str_is_number(self, string=''):
         return bool(self._number_re.fullmatch(string))
 
-    def str_is_nested_string(self, string=''):
+    def str_is_nested(self, string=''):
         return bool(self._nested_re.fullmatch(string))
 
     def str_is_namespaced(self, string=''):
@@ -61,13 +61,13 @@ class UtilityMixin(object):
         namespace = self._namespace_re.match(string)
 
         if namespace:
-            splited_str = string.split(namespace.group(1))
+            splited_string = string.split(namespace.group(1))
 
-            assert len(splited_str) > 0, (
+            assert len(splited_string) > 0, (
                 'Cannot strip namespace from' 'this key `%s`' % (string)
             )
 
-            string = ''.join(splited_str)
+            string = ''.join(splited_string)
 
             return string
 
@@ -110,9 +110,9 @@ class UtilityMixin(object):
         It return the appropiate container `[]`|`{}`
         based on the key provided
         """
-        if self.str_is_nested_string(key):
+        if self.str_is_nested(key):
             key = self.strip_namespace(key)
-            sub_keys = self.split(key)
+            sub_keys = self.split_nested_str(key)
 
             if self.str_is_list(sub_keys[index]):
                 return []
@@ -133,7 +133,7 @@ class UtilityMixin(object):
 
         def object_type(is_obj):
             try:
-                next_key = self.split(keys[next_index])[0]
+                next_key = self.split_nested_str(keys[next_index])[0]
                 if is_obj(next_key):
                     is_last = False
                 else:
@@ -164,7 +164,7 @@ class UtilityMixin(object):
         def ordinary():
             try:
                 if not self.str_is_namespaced(keys[next_index]):
-                    next_k = self.split(keys[next_index])[0]
+                    next_k = self.split_nested_str(keys[next_index])[0]
 
                     if not self.str_is_list(next_k) and not self.str_is_dict(next_k):
                         is_last = False

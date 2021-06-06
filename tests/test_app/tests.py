@@ -37,11 +37,16 @@ class TestViewTestCase(APITestCase):
                         {'code': 'multi-pack', 'value': 'No'}
                     ],
                     'images': [
-                        {'image': response.data['products'][0]['images'][0]['image']},
-                        {'image': response.data['products'][0]['images'][1]['image']},
-                        {'image': response.data['products'][0]['images'][2]['image']},
-                        {'image': response.data['products'][0]['images'][3]['image']},
-                        {'image': response.data['products'][0]['images'][4]['image']},
+                        {'image': response.data['products']
+                            [0]['images'][0]['image']},
+                        {'image': response.data['products']
+                            [0]['images'][1]['image']},
+                        {'image': response.data['products']
+                            [0]['images'][2]['image']},
+                        {'image': response.data['products']
+                            [0]['images'][3]['image']},
+                        {'image': response.data['products']
+                            [0]['images'][4]['image']},
                     ]
                 }
             ],
@@ -66,8 +71,6 @@ class TestViewTestCase(APITestCase):
             '[1][foo][baaz]': '',
             '[1][logo]': 235
         }
-
-        
 
         response = self.client.post('/test-json/', data, format='json')
 

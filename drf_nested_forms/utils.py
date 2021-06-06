@@ -88,7 +88,7 @@ class BaseClass(UtilityMixin):
         matched_keys = []
 
         for key in self._initial_data.keys():
-            if self.str_is_nested_string(key):
+            if self.str_is_nested(key):
                 matched_keys.append(True)
                 break
             else:
@@ -136,9 +136,9 @@ class NestedForms(BaseClass):
         """
         Initiates the conversion process and packages the final data
         """
-        data_list, final_build, top_wrapper = self._group_data(), {}, []
+        data_map, final_build, top_wrapper = self.group_data(), {}, []
 
-        for data in data_list:
+        for data in data_map:
             key = list(data.keys())[0]
             value = list(data.values())[0]
 
@@ -156,7 +156,7 @@ class NestedForms(BaseClass):
 
         self.set_final_build(final_build, top_wrapper)
 
-    def _group_data(self):
+    def group_data(self):
         """
         It groups data structures of the same kind and namespaces together
         """
@@ -170,14 +170,14 @@ class NestedForms(BaseClass):
                     temp = {}
                 else:
                     temp.setdefault(key, value)
-            elif self.str_is_list(self.split(key)[0]):
+            elif self.str_is_list(self.split_nested_str(key)[0]):
                 if self.key_is_last(key, data, 'list'):
                     temp.setdefault(key, value)
                     container.append({self.EMPTY_KEY: temp})
                     temp = {}
                 else:
                     temp.setdefault(key, value)
-            elif self.str_is_dict(self.split(key)[0]):
+            elif self.str_is_dict(self.split_nested_str(key)[0]):
                 if self.key_is_last(key, data, 'dict'):
                     temp.setdefault(key, value)
                     container.append({self.EMPTY_KEY: temp})
@@ -223,9 +223,10 @@ class NestedForms(BaseClass):
         for key, value in validated_data.items():
             value = self.replace_specials(value)
 
-            if self.str_is_nested_string(key):
+            if self.str_is_nested(key):
                 key = self.strip_namespace(key)
                 value = self.clean_value(value)
+
                 self.build_object(key, value, root_tree)
             else:
                 # the root tree is automatically a dict
@@ -240,15 +241,14 @@ class NestedForms(BaseClass):
         if self.is_list(root):
             # check the difference between index of the last item in
             # the list and the current index to be added
-            diff = abs(len(root) - context['index'])
+            undefined_count = abs(len(root) - context['index'])
 
-            if diff > 1000:
+            if undefined_count > 1000:
                 raise ParseException('too many consecutive empty arrays !')
-            elif diff > 1:
+            elif undefined_count > 1 and undefined_count <= 1000:
                 # if it is sparse
                 # fill gaps with the `None`
-                for _ in range(diff):
-                    root.append(None)
+                root += [None] * undefined_count
                 # append the default value
                 root.append(context['value'])
             elif context['value'] and self.is_list(context['value']):
@@ -271,11 +271,12 @@ class NestedForms(BaseClass):
             try:
                 # check if the root of interest is empty or exist
                 inner_root = root[context['index']]
+
                 if inner_root:
                     if self.is_list(inner_root) and context['value']:
                         inner_root.append(context['value'])
                     elif self.is_dict(inner_root) and self.is_dict(context['value']):
-                        #  get keys that are not in inner root 
+                        #  get keys that are not in inner root
                         # transfer their values to inner_root
                         for key in context['value'].keys():
                             if key not in inner_root:
@@ -336,7 +337,7 @@ class NestedForms(BaseClass):
         """
         Build the data structure for a nested key and insert value
         """
-        sub_keys = self.split(nested_key)
+        sub_keys = self.split_nested_str(nested_key)
         index_keys = []
 
         for i, sub_key in enumerate(sub_keys):
