@@ -305,30 +305,30 @@ class NestedForms(BaseClass):
 
         return self.extract_index(key)
 
-    def get_value(self, index, sub_keys, value):
+    def get_value(self, depth, steps, value):
         """
         Get the nested sub key value
         """
-        next_index = index + 1
+        next_depth = depth + 1
 
-        if next_index < len(sub_keys):
-            if self.str_is_dict(sub_keys[next_index]):
+        if next_depth < len(steps):
+            if self.str_is_dict(steps[next_depth]):
                 # at this time the value of the dict is unknown
                 # so `None` is used
-                return {self.strip_bracket(sub_keys[next_index]): None}
+                return {self.strip_bracket(steps[next_depth]): None}
             else:
                 return []
 
         return value
 
-    def get_index_keys(self, index, index_keys, sub_keys):
+    def get_index_keys(self, depth, index_keys, steps):
         """
         Get and store all the index keys for the nested key
         """
-        prev_index = index - 1
+        prev_depth = depth - 1
 
-        if prev_index >= 0:
-            index_keys.append(self.get_index(sub_keys[prev_index]))
+        if prev_depth >= 0:
+            index_keys.append(self.get_index(steps[prev_depth]))
             return index_keys
 
         return index_keys
@@ -337,13 +337,13 @@ class NestedForms(BaseClass):
         """
         Build the data structure for a nested key and insert value
         """
-        sub_keys = self.split_nested_str(nested_key)
-        index_keys = []
+        steps = self.split_nested_str(nested_key)
+        steps_index_keys = []
 
-        for i, sub_key in enumerate(sub_keys):
+        for depth, step in enumerate(steps):
             self.build_key_structure(root_tree, {
-                'depth': i,
-                'index': self.get_index(sub_key),
-                'value': self.get_value(i, sub_keys, value),
-                'keys': self.get_index_keys(i, index_keys, sub_keys)
+                'depth': depth,
+                'index': self.get_index(step),
+                'value': self.get_value(depth, steps, value),
+                'keys': self.get_index_keys(depth, steps_index_keys, steps)
             })
