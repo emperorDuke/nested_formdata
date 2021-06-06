@@ -20,7 +20,8 @@ class TestViewTestCase(APITestCase):
             'products[0][images][1][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][images][2][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][images][3][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
-            'products[0][images][4][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg')
+            'products[0][images][4][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
+            'orderer': 3,
         }
 
         response = self.client.post(
@@ -50,6 +51,62 @@ class TestViewTestCase(APITestCase):
                     ]
                 }
             ],
+            'orderer': 3
+        }
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, expected_output)
+
+    def test_multipart_view_2(self):
+
+        data = {
+            'user_address': 1,
+            'products[0][quantity]': 22,
+            'products[0][attributes][0][code]': 'color',
+            'products[0][attributes][0][value]': 'Pink',
+            'products[0][attributes][1][code]': 'multi-pack',
+            'products[0][attributes][1][value]': 'No',
+            'products[0][images][0][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic1', content_type='image/jpeg'),
+            'products[0][images][1][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic1', content_type='image/jpeg'),
+            'products[1][quantity]': 33,
+            'products[1][attributes][0][code]': 'color',
+            'products[1][attributes][0][value]': 'Green',
+            'products[1][attributes][1][code]': 'multi-pack',
+            'products[1][attributes][1][value]': 'Yes',
+            'products[1][images][0][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic2', content_type='image/jpeg'),
+            'products[1][images][1][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic2', content_type='image/jpeg'),
+            'orderer': 42,
+        }
+
+        response = self.client.post('/test-multipart/', data, format='multipart')
+
+        expected_output = {
+            'user_address': 1,
+            'products': [
+                {
+                    'quantity': 22,
+                    'attributes': [
+                        {'code': 'color', 'value': 'Pink'},
+                        {'code': 'multi-pack', 'value': 'No'}
+                    ],
+                    'images': [
+                        {'image': response.data['products'][0]['images'][0]['image']},
+                        {'image': response.data['products'][0]['images'][1]['image']},
+                    ]
+                },
+                {
+                    'quantity': 33,
+                    'attributes': [
+                        {'code': 'color', 'value': 'Green'},
+                        {'code': 'multi-pack', 'value': 'Yes'}
+                    ],
+                    'images': [
+                        {'image': response.data['products'][1]['images'][0]['image']},
+                        {'image': response.data['products'][1]['images'][1]['image']},
+                    ]
+                }
+            ],
+            'orderer': 42
         }
 
         self.assertEqual(response.status_code, 200)

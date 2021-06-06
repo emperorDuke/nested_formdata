@@ -145,7 +145,11 @@ class NestedForms(BaseClass):
             root_tree = self.decode(value)
 
             if bool(key):
-                final_build.setdefault(key, root_tree)
+                if key in final_build:
+                    for idx in range(len(final_build[key])):
+                        final_build[key][idx].update(root_tree[idx])
+                else:
+                    final_build.setdefault(key, root_tree)
             else:
                 if self.is_dict(root_tree):
                     final_build.update(root_tree)
