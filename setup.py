@@ -26,7 +26,7 @@ setup(
     name='drf_nested_forms',
     version=version,
     url='http://github.com/emperorDuke/nested_formdata',
-    download_url='http://github.com/emperorDuke/nested_formdata/archive/v1.1.0.tar.gz',
+    download_url='http://github.com/emperorDuke/nested_formdata/archive/v1.1.1.tar.gz',
     license='MIT',
     description='A library that parses nested json or form data to python object',
     long_description=long_description,
