@@ -12,15 +12,25 @@ class TestViewTestCase(APITestCase):
             'products[0][quantity]': 2,
             'products[0][attributes][0][code]': 'color',
             'products[0][attributes][0][value]': 'Pink',
+            'products[0][attributes][0][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][attributes][1][code]': 'size',
             'products[0][attributes][1][value]': '6.0',
+            'products[0][attributes][1][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][attributes][2][code]': 'multi-pack',
             'products[0][attributes][2][value]': 'No',
+            'products[0][attributes][2][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][images][0][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][images][1][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
             'products[0][images][2][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
-            'products[0][images][3][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
-            'products[0][images][4][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg')
+            'products[1][quantity]': 3,
+            'products[1][attributes][0][code]': 'color',
+            'products[1][attributes][0][value]': 'Green',
+            'products[1][attributes][1][code]': 'multi-pack',
+            'products[1][attributes][1][value]': 'Yes',
+            'products[1][images][0][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic2', content_type='image/jpeg'),
+            'products[1][images][1][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic2', content_type='image/jpeg'),
+            'products[1][images][2][image]': SimpleUploadedFile('hp.jpeg', b'hp_pic', content_type='image/jpeg'),
+            'orderer': 11,
         }
 
         response = self.client.post(
@@ -32,9 +42,12 @@ class TestViewTestCase(APITestCase):
                 {
                     'quantity': 2,
                     'attributes': [
-                        {'code': 'color', 'value': 'Pink'},
-                        {'code': 'size', 'value': '6.0'},
-                        {'code': 'multi-pack', 'value': 'No'}
+                        {'code': 'color', 'value': 'Pink',
+                            'image': response.data['products'][0]['attributes'][0]['image']},
+                        {'code': 'size', 'value': '6.0',
+                            'image': response.data['products'][0]['attributes'][1]['image']},
+                        {'code': 'multi-pack', 'value': 'No',
+                            'image': response.data['products'][0]['attributes'][2]['image']}
                     ],
                     'images': [
                         {'image': response.data['products']
@@ -43,13 +56,25 @@ class TestViewTestCase(APITestCase):
                             [0]['images'][1]['image']},
                         {'image': response.data['products']
                             [0]['images'][2]['image']},
+                    ],
+                },
+                {
+                    'quantity': 3,
+                    'attributes': [
+                        {'code': 'color', 'value': 'Green'},
+                        {'code': 'multi-pack', 'value': 'Yes'}
+                    ],
+                    'images': [
                         {'image': response.data['products']
-                            [0]['images'][3]['image']},
+                            [1]['images'][0]['image']},
                         {'image': response.data['products']
-                            [0]['images'][4]['image']},
+                            [1]['images'][1]['image']},
+                        {'image': response.data['products']
+                            [1]['images'][2]['image']},
                     ]
                 }
             ],
+            'orderer': 11,
         }
 
         self.assertEqual(response.status_code, 200)

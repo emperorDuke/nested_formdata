@@ -1,4 +1,5 @@
 from collections.abc import Mapping
+from re import S
 
 from .exceptions import ParseException
 from .mixins import UtilityMixin
@@ -136,16 +137,16 @@ class NestedForms(BaseClass):
         """
         Initiates the conversion process and packages the final data
         """
-        data_map, final_build, top_wrapper = self.group_data(), {}, []
+        data_map, final_build, top_wrapper = self.grouped_nested_data(), {}, []
 
         for data in data_map:
-            key = list(data.keys())[0]
-            value = list(data.values())[0]
+            group_key = next(iter(data))
+            nested_struct = next(iter(data.values()))
 
-            root_tree = self.decode(value)
+            root_tree = self.decode(nested_struct)
 
-            if bool(key):
-                final_build.setdefault(key, root_tree)
+            if group_key:
+                final_build.setdefault(group_key, root_tree)
             else:
                 if self.is_dict(root_tree):
                     final_build.update(root_tree)
@@ -156,9 +157,9 @@ class NestedForms(BaseClass):
 
         self.set_final_build(final_build, top_wrapper)
 
-    def group_data(self):
+    def grouped_nested_data(self):
         """
-        It groups data structures of the same kind and namespaces together
+        It groups nested structures of the same kind and namespaces together
         """
         temp, container, data = {}, [], self.validated_data
 
@@ -192,7 +193,31 @@ class NestedForms(BaseClass):
                 else:
                     temp.setdefault(key, value)
 
-        return container
+        return self.merger(container)
+
+    def merger(self, grouped_data):
+        """
+        Merge grouped nested data with the same key
+        """
+        merged_map = []
+
+        for data in grouped_data:
+            group_key = next(iter(data))
+
+            if len(merged_map) > 1 and group_key != self.EMPTY_KEY:
+                for map in merged_map:
+                    map_key = next(iter(map))
+
+                    if group_key == map_key:
+                        map_value = next(iter(map.values()))
+                        data_value = next(iter(data.values()))
+
+                        map_value.update(data_value)
+                        break
+            else:
+                merged_map.append(data)
+
+        return merged_map
 
     def set_final_build(self, final_build, top_wrapper):
         """
@@ -208,19 +233,19 @@ class NestedForms(BaseClass):
         else:
             raise ParseException('unexpected empty container')
 
-    def decode(self, validated_data):
+    def decode(self, nested_data):
         """
-        Convert validated_data to an object containing primitives
+        Trys to Convert nested data to an object containing primitives
         """
         root_tree = None
 
         ############# initialize the root_tree ###################
         if root_tree is None:
-            key = list(validated_data.keys())[0]
+            key = list(nested_data.keys())[0]
             root_tree = self.get_container(key)
         #########################################################
 
-        for key, value in validated_data.items():
+        for key, value in nested_data.items():
             value = self.replace_specials(value)
 
             if self.str_is_nested(key):
@@ -252,7 +277,6 @@ class NestedForms(BaseClass):
                 # append the default value
                 root.append(context['value'])
             elif context['value'] and self.is_list(context['value']):
-
                 # if context value is not empty and its a list, transfer
                 # value into the root
                 root.extend(context['value'])
@@ -262,7 +286,7 @@ class NestedForms(BaseClass):
         else:
             root[context['index']] = context['value']
 
-    def build_key_structure(self, root, context, depth=0):
+    def build_step_structure(self, root, context, depth=0):
         """
         Insert and updates the root tree according to the context passed as
         argument
@@ -289,7 +313,7 @@ class NestedForms(BaseClass):
             # if not depth of interest unpack the root object with keys
             # provided by context['keys']
             key = context['keys'][depth]
-            self.build_key_structure(root[key], context, depth=depth + 1)
+            self.build_step_structure(root[key], context, depth=depth + 1)
 
     def get_index(self, key):
         """
@@ -341,7 +365,7 @@ class NestedForms(BaseClass):
         steps_index_keys = []
 
         for depth, step in enumerate(steps):
-            self.build_key_structure(root_tree, {
+            self.build_step_structure(root_tree, {
                 'depth': depth,
                 'index': self.get_index(step),
                 'value': self.get_value(depth, steps, value),

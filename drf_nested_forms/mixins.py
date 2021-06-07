@@ -2,12 +2,10 @@ import re
 
 # Nested Form data deserializer utility class
 # --------------------------------------------
-
-
 class UtilityMixin(object):
-    _nested_re = re.compile(r'((.+)\[(.*)\]+)|(\[(.*)\]{2,})')
+    _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){2,}')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
-    _list_re = re.compile(r'\[([0-9]+)\]')
+    _list_re = re.compile(r'\[[0-9]+\]')
     _number_re = re.compile(r'[0-9]+')
     _dict_re = re.compile(r'\[(([^A-Za-z]*)([^0-9]+)([0-9]*))+\]')
 
@@ -19,7 +17,7 @@ class UtilityMixin(object):
     def split_nested_str(string=''):
         subkeys = [key + ']' for key in string.split(']') if key != '']
 
-        assert len(subkeys) > 0, ('Cannot split this key `%s`' % (string))
+        assert len(subkeys) > 0, ('cannot split this key `%s`' % (string))
 
         return subkeys
 
@@ -64,7 +62,7 @@ class UtilityMixin(object):
             splited_string = string.split(namespace.group(1))
 
             assert len(splited_string) > 0, (
-                'Cannot strip namespace from' 'this key `%s`' % (string)
+                'cannot strip namespace from' 'this key `%s`' % (string)
             )
 
             string = ''.join(splited_string)
