@@ -1,5 +1,4 @@
 from collections.abc import Mapping
-from re import S
 
 from .exceptions import ParseException
 from .mixins import UtilityMixin
