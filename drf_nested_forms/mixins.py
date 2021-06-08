@@ -2,6 +2,8 @@ import re
 
 # Nested Form data deserializer utility class
 # --------------------------------------------
+
+
 class UtilityMixin(object):
     _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){2,}')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
@@ -59,15 +61,13 @@ class UtilityMixin(object):
         namespace = self._namespace_re.match(string)
 
         if namespace:
-            splited_string = string.split(namespace.group(1))
+            splited_string = string.split(namespace.group(0))
 
             assert len(splited_string) > 0, (
                 'cannot strip namespace from' 'this key `%s`' % (string)
             )
 
-            string = ''.join(splited_string)
-
-            return string
+            return ''.join(splited_string)
 
         return string
 
@@ -81,7 +81,7 @@ class UtilityMixin(object):
 
     def replace_specials(self, string):
         """
-        Checks for and replaces special characters like null, booleans
+        Replaces special characters like null, booleans
         also changes numbers from string to integer
         """
         # the incoming value may not be a string sometimes
@@ -120,6 +120,20 @@ class UtilityMixin(object):
                 return None
         else:
             return {}
+
+    def get_index(self, key):
+        """
+        Get the nested sub key index
+        """
+        if self.str_is_dict(key):
+            return self.strip_bracket(key)
+        elif self.str_is_empty_list(key):
+            # an empty list always has it index as '0'
+            # unless the key is repeated, then it will
+            # have an array of values attached to the same key
+            return 0
+
+        return self.extract_index(key)
 
     def key_is_last(self, current_key, data, is_type_of='non_nested'):
         """

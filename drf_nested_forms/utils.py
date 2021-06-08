@@ -61,7 +61,6 @@ class BaseClass(UtilityMixin):
 
         ###### Check if initial_data is a MultiValueDIct ############
         ###### Convert it to a dict object ##########################
-
         if hasattr(self._initial_data, 'getlist'):
             raw_data = {}
 
@@ -72,17 +71,14 @@ class BaseClass(UtilityMixin):
                     raw_data[key] = value[0]
 
             self._initial_data = raw_data
-
         #############################################################
 
         is_mapping = isinstance(self._initial_data, Mapping)
         conditions = [is_mapping]
 
         #############################################################
-
         if not is_mapping and raise_exception:
             raise ValueError('`data` is not a map type')
-
         #############################################################
 
         matched_keys = []
@@ -97,10 +93,8 @@ class BaseClass(UtilityMixin):
         conditions += [any(matched_keys)]
 
         #############################################################
-
         if not any(matched_keys) and raise_exception:
             raise ValueError('`data` is not a nested type')
-
         #############################################################
 
         if all(conditions):
@@ -136,65 +130,48 @@ class NestedForms(BaseClass):
         """
         Initiates the conversion process and packages the final data
         """
-        data_map, final_build, top_wrapper = self.grouped_nested_data(), {}, []
+        self._final_data = self._get_build()
 
-        for data in data_map:
-            group_key = next(iter(data))
-            nested_struct = next(iter(data.values()))
+    def _create_groups(self):
+        container, temp = [], {}
 
-            root_tree = self.decode(nested_struct)
+        def get_map(key, type):
+            if type == 'namespace':
+                return {self.get_namespace(key): temp}
 
-            if group_key:
-                final_build.setdefault(group_key, root_tree)
+            return {self.EMPTY_KEY: temp}
+
+        def group(key, data, value, type='non_nested'):
+            nonlocal temp
+
+            if self.key_is_last(key, data, type):
+                temp.setdefault(self.strip_namespace(key), value)
+                container.append(get_map(key, type))
+                temp = {}
             else:
-                if self.is_dict(root_tree):
-                    final_build.update(root_tree)
-                elif self.is_list(root_tree) and final_build:
-                    final_build[self.EMPTY_KEY] = root_tree
-                else:
-                    top_wrapper.append(root_tree)
+                temp.setdefault(self.strip_namespace(key), value)
 
-        self.set_final_build(final_build, top_wrapper)
+        return (container, group)
 
-    def grouped_nested_data(self):
+    def _grouped_nested_data(self):
         """
         It groups nested structures of the same kind and namespaces together
         """
-        temp, container, data = {}, [], self.validated_data
+        data, (groups, group) = self.validated_data, self._create_groups()
 
         for key, value in data.items():
             if self.str_is_namespaced(key):
-                if self.key_is_last(key, data, 'namespace'):
-                    temp.setdefault(key, value)
-                    container.append({self.get_namespace(key): temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
+                group(key, data, value, 'namespace')
             elif self.str_is_list(self.split_nested_str(key)[0]):
-                if self.key_is_last(key, data, 'list'):
-                    temp.setdefault(key, value)
-                    container.append({self.EMPTY_KEY: temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
+                group(key, data, value, 'list')
             elif self.str_is_dict(self.split_nested_str(key)[0]):
-                if self.key_is_last(key, data, 'dict'):
-                    temp.setdefault(key, value)
-                    container.append({self.EMPTY_KEY: temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
+                group(key, data, value, 'dict')
             else:
-                if self.key_is_last(key, data):
-                    temp.setdefault(key, value)
-                    container.append({self.EMPTY_KEY: temp})
-                    temp = {}
-                else:
-                    temp.setdefault(key, value)
+                group(key, data, value)
 
-        return self.merger(container)
+        return self._merge(groups)
 
-    def merger(self, grouped_data):
+    def _merge(self, grouped_data):
         """
         Merge grouped nested data with the same key
         """
@@ -209,87 +186,98 @@ class NestedForms(BaseClass):
 
                     if group_key == map_key:
                         map_value = next(iter(map.values()))
-                        data_value = next(iter(data.values()))
+                        group_data_value = next(iter(data.values()))
 
-                        map_value.update(data_value)
+                        map_value.update(group_data_value)
                         break
             else:
                 merged_map.append(data)
 
         return merged_map
 
-    def set_final_build(self, final_build, top_wrapper):
+    def _get_build(self):
         """
-        Set the final build
+        gets the final build
         """
+        data_map, final_build, top_wrapper = self._grouped_nested_data(), {}, []
+
+        for data in data_map:
+            group_key = next(iter(data))
+            nested_struct = next(iter(data.values()))
+
+            root_tree = self._decode(nested_struct)
+
+            if group_key:
+                final_build.setdefault(group_key, root_tree)
+            else:
+                if self.is_dict(root_tree):
+                    final_build.update(root_tree)
+                elif self.is_list(root_tree) and final_build:
+                    final_build[self.EMPTY_KEY] = root_tree
+                else:
+                    top_wrapper.append(root_tree)
+
         if final_build:
             top_wrapper.append(final_build)
 
         if len(top_wrapper) == 1:
-            self._final_data = top_wrapper[0]
+            return top_wrapper[0]
         elif len(top_wrapper) > 1:
-            self._final_data = top_wrapper
+            return top_wrapper
         else:
             raise ParseException('unexpected empty container')
 
-    def decode(self, nested_data):
+    def _decode(self, nested_data):
         """
         Trys to Convert nested data to an object containing primitives
         """
-        root_tree = None
-
-        ############# initialize the root_tree ###################
-        if root_tree is None:
-            key = list(nested_data.keys())[0]
-            root_tree = self.get_container(key)
-        #########################################################
+        root_tree = self.get_container(next(iter(nested_data)))
 
         for key, value in nested_data.items():
-            value = self.replace_specials(value)
+            value = self.clean_value(self.replace_specials(value))
 
             if self.str_is_nested(key):
-                key = self.strip_namespace(key)
-                value = self.clean_value(value)
-
-                self.build_object(key, value, root_tree)
+                self._build_object(key, value, root_tree)
             else:
                 # the root tree is automatically a dict
                 root_tree.setdefault(key, value)
 
         return root_tree
 
-    def build_root(self, root, context):
-        """
-        Build the data root structure using the context
-        """
-        if self.is_list(root):
-            # check the difference between index of the last item in
-            # the list and the current index to be added
-            undefined_count = abs(len(root) - context['index'])
-
-            if undefined_count > 1000:
-                raise ParseException('too many consecutive empty arrays !')
-            elif undefined_count > 1 and undefined_count <= 1000:
-                # if it is sparse
-                # fill gaps with the `None`
-                root += [None] * undefined_count
-                # append the default value
-                root.append(context['value'])
-            elif context['value'] and self.is_list(context['value']):
-                # if context value is not empty and its a list, transfer
-                # value into the root
-                root.extend(context['value'])
-            else:
-                # just append like default
-                root.append(context['value'])
-        else:
-            root[context['index']] = context['value']
-
-    def build_step_structure(self, root, context, depth=0):
+    def _build_step_structure(self, root, context, depth=0):
         """
         Insert and updates the root tree according to the context passed as
         argument
         """
+        ############################################################################
+        def build_root(root):
+            """
+            Build the data root structure using the context
+            """
+            if self.is_list(root):
+                # check the difference between index of the last item in
+                # the list and the current index to be added
+                undefined_count = abs(len(root) - context['index'])
+
+                if undefined_count > 1000:
+                    raise ParseException('too many consecutive empty arrays !')
+                elif undefined_count > 1 and undefined_count <= 1000:
+                    # if it is sparse
+                    # fill gaps with the `None`
+                    root += [None] * undefined_count
+                    # append the default value
+                    root.append(context['value'])
+                elif context['value'] and self.is_list(context['value']):
+                    # if context value is not empty and its a list, transfer
+                    # value into the root
+                    root.extend(context['value'])
+                else:
+                    # just append like default
+                    root.append(context['value'])
+            else:
+                root[context['index']] = context['value']
+        ###############################################################################
+
         if context['depth'] == depth:
             try:
                 # check if the root of interest is empty or exist
@@ -305,68 +293,54 @@ class NestedForms(BaseClass):
                             if key not in inner_root:
                                 inner_root.update(context['value'])
                 else:
-                    self.build_root(root, context)
+                    build_root(root)
             except (KeyError, IndexError):
-                self.build_root(root, context)
+                build_root(root)
         else:
             # if not depth of interest unpack the root object with keys
             # provided by context['keys']
             key = context['keys'][depth]
-            self.build_step_structure(root[key], context, depth=depth + 1)
+            self._build_step_structure(root[key], context, depth=depth + 1)
 
-    def get_index(self, key):
-        """
-        Get the nested sub key index
-        """
-        if self.str_is_dict(key):
-            return self.strip_bracket(key)
-        elif self.str_is_empty_list(key):
-            # an empty list always has it index as '0'
-            # unless the key is repeated, then it will
-            # have an array of values attached to the same key
-            return 0
-
-        return self.extract_index(key)
-
-    def get_value(self, depth, steps, value):
-        """
-        Get the nested sub key value
-        """
-        next_depth = depth + 1
-
-        if next_depth < len(steps):
-            if self.str_is_dict(steps[next_depth]):
-                # at this time the value of the dict is unknown
-                # so `None` is used
-                return {self.strip_bracket(steps[next_depth]): None}
-            else:
-                return []
-
-        return value
-
-    def get_index_keys(self, depth, index_keys, steps):
-        """
-        Get and store all the index keys for the nested key
-        """
-        prev_depth = depth - 1
-
-        if prev_depth >= 0:
-            index_keys.append(self.get_index(steps[prev_depth]))
-            return index_keys
-
-        return index_keys
-
-    def build_object(self, nested_key, value, root_tree):
+    def _build_object(self, nested_key, value, root_tree):
         """
         Build the data structure for a nested key and insert value
         """
         steps = self.split_nested_str(nested_key)
         steps_index_keys = []
 
+        def get_index_keys(depth):
+            """
+            Get and store all the index keys for the nested key
+            """
+            prev_depth = depth - 1
+
+            if prev_depth >= 0:
+                steps_index_keys.append(self.get_index(steps[prev_depth]))
+                return steps_index_keys
+
+            return steps_index_keys
+
+        def get_value(depth):
+            """
+            Get the nested sub key value
+            """
+            next_depth = depth + 1
+
+            if next_depth < len(steps):
+                if self.str_is_dict(steps[next_depth]):
+                    # at this time the value of the dict is unknown
+                    # so `None` is used
+                    return {self.strip_bracket(steps[next_depth]): None}
+                else:
+                    return []
+
+            return value
+
         for depth, step in enumerate(steps):
-            self.build_step_structure(root_tree, {
+            self._build_step_structure(root_tree, {
                 'depth': depth,
                 'index': self.get_index(step),
-                'value': self.get_value(depth, steps, value),
-                'keys': self.get_index_keys(depth, steps_index_keys, steps)
+                'value': get_value(depth),
+                'keys': get_index_keys(depth)
             })
