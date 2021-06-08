@@ -22,6 +22,9 @@ matrix:
     - name: "Django 3.2.4"
       env:
         - DJANGO="django==3.2.4"
+    - name: "djangorestframework 3.12.4"
+      env:
+        - DRF="djangorestframework==3.12.4"
 
 
 install: pip install -r requirements.txt
