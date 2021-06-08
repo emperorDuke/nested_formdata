@@ -13,20 +13,18 @@ matrix:
       python: "3.7"
     - name: "Python 3.6"
       python: "3.6"
+      - name: "Django 1.11"
+      env:
+        - DJANGO="django==1.11.27"
     - name: "Django 2.2"
       env:
         - DJANGO="django==2.2.9"
-    - name: "Django 1.11"
-      env:
-        - DJANGO="django==1.11.27"
+        - DRF="djangorestframework==3.9.3"
     - name: "Django 3.2.4"
       env:
         - DJANGO="django==3.2.4"
-    - name: "djangorestframework 3.12.4"
-      env:
         - DRF="djangorestframework==3.12.4"
-
-
+        
 install: pip install -r requirements.txt
 
 script: python runtests.py
