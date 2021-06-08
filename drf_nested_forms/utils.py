@@ -133,25 +133,25 @@ class NestedForms(BaseClass):
         self._final_data = self._get_build()
 
     def _create_groups(self):
-        container, temp = [], {}
+        groups, temporary_map = [], {}
 
         def get_map(key, type):
             if type == 'namespace':
-                return {self.get_namespace(key): temp}
+                return {self.get_namespace(key): temporary_map}
 
-            return {self.EMPTY_KEY: temp}
+            return {self.EMPTY_KEY: temporary_map}
 
         def group(key, data, value, type='non_nested'):
-            nonlocal temp
+            nonlocal temporary_map
 
             if self.key_is_last(key, data, type):
-                temp.setdefault(self.strip_namespace(key), value)
-                container.append(get_map(key, type))
-                temp = {}
+                temporary_map.setdefault(self.strip_namespace(key), value)
+                groups.append(get_map(key, type))
+                temporary_map = {}
             else:
-                temp.setdefault(self.strip_namespace(key), value)
+                temporary_map.setdefault(self.strip_namespace(key), value)
 
-        return (container, group)
+        return (groups, group)
 
     def _grouped_nested_data(self):
         """
