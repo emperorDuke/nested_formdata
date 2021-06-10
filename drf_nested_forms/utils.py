@@ -1,5 +1,7 @@
 from collections.abc import Mapping
 
+from django.http.request import QueryDict
+
 from .exceptions import ParseException
 from .mixins import UtilityMixin
 
@@ -9,8 +11,8 @@ from .mixins import UtilityMixin
 
 class BaseClass(UtilityMixin):
 
-    def __init__(self, data, *args, **kwargs):
-        self._initial_data = data
+    def __init__(self, data, **kwargs):
+        self._initial_data = self.__set_data__(data)
         self._allow_empty = kwargs.get('allow_empty', False)
         self._allow_blank = kwargs.get('allow_blank', True)
 
@@ -20,6 +22,24 @@ class BaseClass(UtilityMixin):
     def __run__(self):
         if not hasattr(self, '_final_data'):
             self.__process__()
+
+    def __set_data__(self, data):
+        """
+        Check if initial_data is a MultiValueDIct and 
+        convert it to a dict object
+        """
+        if isinstance(data, QueryDict):
+            _data = {}
+
+            for key, value in dict(data).items():
+                if len(value) > 1:
+                    _data.setdefault(key, value)
+                else:
+                    _data.setdefault(key, value[0])
+
+            return _data
+
+        return data
 
     @property
     def data(self):
@@ -58,21 +78,6 @@ class BaseClass(UtilityMixin):
         """
         Checks if the initial data map is a nested object
         """
-
-        ###### Check if initial_data is a MultiValueDIct ############
-        ###### Convert it to a dict object ##########################
-        if hasattr(self._initial_data, 'getlist'):
-            raw_data = {}
-
-            for key, value in dict(self._initial_data).items():
-                if len(value) > 1:
-                    raw_data[key] = value
-                else:
-                    raw_data[key] = value[0]
-
-            self._initial_data = raw_data
-        #############################################################
-
         is_mapping = isinstance(self._initial_data, Mapping)
         conditions = [is_mapping]
 
@@ -81,14 +86,10 @@ class BaseClass(UtilityMixin):
             raise ValueError('`data` is not a map type')
         #############################################################
 
-        matched_keys = []
-
-        for key in self._initial_data.keys():
-            if self.str_is_nested(key):
-                matched_keys.append(True)
-                break
-            else:
-                matched_keys.append(False)
+        matched_keys = [
+            self.str_is_nested(key)
+            for key in self._initial_data.keys()
+        ]
 
         conditions += [any(matched_keys)]
 
@@ -128,28 +129,85 @@ class NestedForms(BaseClass):
 
     def __process__(self):
         """
-        Initiates the conversion process and packages the final data
+        Initiates the conversion process
         """
         self._final_data = self._get_build()
+
+    def _merge(self, grouped_data):
+        """
+        Merge grouped nested data with the same key
+        """
+        merged_map = []
+
+        #################################################################
+        def type_of(nested_map):
+            # map key if present is the namespace
+            map_key = next(iter(nested_map.keys()))
+            # map value is a nested form which is a dict
+            map_value = next(iter(nested_map.values()))
+            # get the first key of nested form
+            map_value_keys = next(iter(map_value.keys()))
+            # get fisrt nested index
+            map_value_first_key = self.split_nested_str(map_value_keys)[0]
+
+            if map_key:
+                return map_key
+            elif self.str_is_dict(map_value_first_key):
+                return 'dict'
+            elif self.str_is_list(map_value_first_key):
+                return 'list'
+            else:
+                return 'non_nested'
+        ###############################################################
+
+        def update_merge_map(merged_map, old_map_value):
+            updated = False
+
+            for new_map in merged_map:
+                if type_of(new_map) == type_of(old_map):
+                    new_map_value = next(iter(new_map.values()))
+                    new_map_value.update(old_map_value)
+
+                    updated = True
+
+            return updated
+        ###############################################################
+
+        for old_map in grouped_data:
+            old_map_value = next(iter(old_map.values()))
+
+            if merged_map:
+                updated = update_merge_map(merged_map, old_map_value)
+
+                if not updated:
+                    merged_map.append(old_map)
+
+            else:
+                merged_map.append(old_map)
+
+        return merged_map
 
     def _create_groups(self):
         groups, temporary_map = [], {}
 
-        def get_map(key, type):
-            if type == 'namespace':
+        ###############################################################
+        def get_map(key, is_of_type, temporary_map):
+            if is_of_type == 'namespace':
                 return {self.get_namespace(key): temporary_map}
 
             return {self.EMPTY_KEY: temporary_map}
+        #################################################################
 
-        def group(key, data, value, type='non_nested'):
+        def group(key, data, value, is_of_type='non_nested'):
             nonlocal temporary_map
 
-            if self.key_is_last(key, data, type):
+            if self.key_is_last(key, data, is_of_type):
                 temporary_map.setdefault(self.strip_namespace(key), value)
-                groups.append(get_map(key, type))
+                groups.append(get_map(key, is_of_type, temporary_map))
                 temporary_map = {}
             else:
                 temporary_map.setdefault(self.strip_namespace(key), value)
+        ###################################################################
 
         return (groups, group)
 
@@ -171,38 +229,16 @@ class NestedForms(BaseClass):
 
         return self._merge(groups)
 
-    def _merge(self, grouped_data):
-        """
-        Merge grouped nested data with the same key
-        """
-        merged_map = []
-
-        for data in grouped_data:
-            group_key = next(iter(data))
-
-            if len(merged_map) > 1 and group_key != self.EMPTY_KEY:
-                for map in merged_map:
-                    map_key = next(iter(map))
-
-                    if group_key == map_key:
-                        map_value = next(iter(map.values()))
-                        group_data_value = next(iter(data.values()))
-
-                        map_value.update(group_data_value)
-                        break
-            else:
-                merged_map.append(data)
-
-        return merged_map
-
     def _get_build(self):
         """
-        gets the final build
+        Gets the final build
         """
-        data_map, final_build, top_wrapper = self._grouped_nested_data(), {}, []
+        data_map = self._grouped_nested_data()
+        final_build = {}
+        top_wrapper = []
 
         for data in data_map:
-            group_key = next(iter(data))
+            group_key = next(iter(data.keys()))
             nested_struct = next(iter(data.values()))
 
             root_tree = self._decode(nested_struct)
@@ -231,7 +267,7 @@ class NestedForms(BaseClass):
         """
         Trys to Convert nested data to an object containing primitives
         """
-        root_tree = self.get_container(next(iter(nested_data)))
+        root_tree = self.get_container(next(iter(nested_data.keys())))
 
         for key, value in nested_data.items():
             value = self.clean_value(self.replace_specials(value))
@@ -251,9 +287,6 @@ class NestedForms(BaseClass):
         """
         ############################################################################
         def build_root(root):
-            """
-            Build the data root structure using the context
-            """
             if self.is_list(root):
                 # check the difference between index of the last item in
                 # the list and the current index to be added

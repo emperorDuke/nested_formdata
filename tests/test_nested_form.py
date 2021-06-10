@@ -107,11 +107,11 @@ class NestedFormTestCase(unittest.TestCase):
             'item': {
                 'attribute': [
                     {'user_type': 'size'},
-                    {'user_type': ''}
+                    {'user_type': None}
                 ],
-                'verbose': [''],
+                'verbose': [None],
                 'variant': {
-                    'vendor_metric': None,
+                    'vendor_metric': [],
                     'metric_verbose_name': 'Large'
                 },
                 'foo': {'baaz': None}
@@ -119,8 +119,8 @@ class NestedFormTestCase(unittest.TestCase):
         }
 
         options = {
-            'allow_blank': True,
-            'allow_empty': False
+            'allow_blank': False,
+            'allow_empty': True
         }
 
         form = NestedForms(data_4, **options)

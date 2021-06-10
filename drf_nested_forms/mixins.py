@@ -144,19 +144,19 @@ class UtilityMixin(object):
         next_index = current_index + 1
 
         def object_type(is_obj):
-            try:
+            is_last = True
+
+            if next_index < len(keys):
                 next_key = self.split_nested_str(keys[next_index])[0]
                 if is_obj(next_key):
                     is_last = False
-                else:
-                    is_last = True
-            except IndexError:
-                is_last = True
 
             return is_last
 
         def namespace():
-            try:
+            is_last = True
+
+            if next_index < len(keys):
                 next_key = keys[next_index]
                 if self.str_is_namespaced(next_key):
                     current_namespace = self.get_namespace(current_key)
@@ -164,28 +164,20 @@ class UtilityMixin(object):
 
                     if current_namespace == next_namespace:
                         is_last = False
-                    else:
-                        is_last = True
-                else:
-                    is_last = True
-            except IndexError:
-                is_last = True
 
             return is_last
 
         def ordinary():
-            try:
-                if not self.str_is_namespaced(keys[next_index]):
-                    next_k = self.split_nested_str(keys[next_index])[0]
+            is_last = True
 
-                    if not self.str_is_list(next_k) and not self.str_is_dict(next_k):
+            if next_index < len(keys):
+                if not self.str_is_namespaced(keys[next_index]):
+                    next_key = self.split_nested_str(keys[next_index])[0]
+                    str_is_list = self.str_is_list(next_key)
+                    str_is_dict = self.str_is_dict(next_key)
+
+                    if not str_is_list and not str_is_dict:
                         is_last = False
-                    else:
-                        is_last = True
-                else:
-                    is_last = True
-            except IndexError:
-                is_last = True
 
             return is_last
 
