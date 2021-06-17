@@ -1,6 +1,5 @@
 from collections.abc import Mapping
-
-from django.http.request import QueryDict
+from rest_framework.utils import html
 
 from .exceptions import ParseException
 from .mixins import UtilityMixin
@@ -28,7 +27,7 @@ class BaseClass(UtilityMixin):
         Check if data is a MultiValueDIct and 
         convert it to a dict object else return data
         """
-        if isinstance(data, QueryDict):
+        if html.is_html_input(data):
             _data = {}
 
             for key, value in dict(data).items():
@@ -131,7 +130,7 @@ class NestedForms(BaseClass):
         """
         Initiates the conversion process
         """
-        self._final_data = self._get_build()
+        self._final_data = self._get_build(self._validated_data)
 
     def _merge(self, grouped_data):
         """
@@ -211,11 +210,11 @@ class NestedForms(BaseClass):
 
         return (groups, group)
 
-    def _grouped_nested_data(self):
+    def _grouped_nested_data(self, validated_data):
         """
         It groups nested structures of the same kind and namespaces together
         """
-        data, (groups, group) = self.validated_data, self._create_groups()
+        data, (groups, group) = validated_data, self._create_groups()
 
         for key, value in data.items():
             if self.str_is_namespaced(key):
@@ -229,12 +228,12 @@ class NestedForms(BaseClass):
 
         return self._merge(groups)
 
-    def _get_build(self):
+    def _get_build(self, validated_data):
         """
         Gets the final build
         """
-        data_map = self._grouped_nested_data()
-        final_build = self.initialize(self._validated_data.keys())
+        data_map = self._grouped_nested_data(validated_data)
+        final_build = self.initialize(validated_data.keys())
 
         for data in data_map:
             group_key = next(iter(data.keys()))
@@ -247,7 +246,7 @@ class NestedForms(BaseClass):
                     final_build.setdefault(group_key, root_tree)
                 elif self.is_dict(root_tree):
                     final_build.update(root_tree)
-                elif self.is_list(root_tree):
+                else:
                     final_build[self.EMPTY_KEY] = root_tree
             else:
                 final_build.extend(root_tree)
