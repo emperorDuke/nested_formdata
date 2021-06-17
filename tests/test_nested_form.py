@@ -137,6 +137,7 @@ class NestedFormTestCase(unittest.TestCase):
             'item[attribute][0][user_type]': 'size',
             'item[attribute][3][user_type]': 'color',
             'item[attribute][6][user_type]': 'length',
+            'item[attribute][7][0]': 'size'
         }
 
         expected_output = {
@@ -148,7 +149,8 @@ class NestedFormTestCase(unittest.TestCase):
                     {'user_type': 'color'},
                     None,
                     None,
-                    {'user_type': 'length'}
+                    {'user_type': 'length'},
+                    ['size']
                 ]
             }
         }
@@ -189,6 +191,12 @@ class NestedFormTestCase(unittest.TestCase):
         i would prefer to avoid data structures like this` 
         """
         data_7 = {
+            '[0][attribute]': 'size',
+            '[0][verbose][0]': 'bazz',
+            '[0][verbose][1]': 'foo',
+            '[0][variant][vendor_metric]': '456',
+            '[0][variant][metric_verbose_name]': 'Large',
+            '[0][foo][baaz]': 'ggg',
             'item[attribute][0][user_type]': 'size',
             'item[attribute][1][user_type]': 'color',
             'item[verbose][]': '[]',
@@ -202,12 +210,6 @@ class NestedFormTestCase(unittest.TestCase):
             'next[variant][metric_verbose_name]': 'Large',
             'next[foo][baaz]': 'null',
             '[variant][]': 'color',
-            '[0][attribute]': 'size',
-            '[0][verbose][0]': 'bazz',
-            '[0][verbose][1]': 'foo',
-            '[0][variant][vendor_metric]': '456',
-            '[0][variant][metric_verbose_name]': 'Large',
-            '[0][foo][baaz]': 'ggg',
         }
 
         expected_output = {

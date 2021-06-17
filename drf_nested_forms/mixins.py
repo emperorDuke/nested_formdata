@@ -3,7 +3,6 @@ import re
 # Nested Form data deserializer utility class
 # --------------------------------------------
 
-
 class UtilityMixin(object):
     _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){2,}')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
@@ -17,11 +16,7 @@ class UtilityMixin(object):
 
     @staticmethod
     def split_nested_str(string=''):
-        subkeys = [key + ']' for key in string.split(']') if key != '']
-
-        assert len(subkeys) > 0, ('cannot split this key `%s`' % (string))
-
-        return subkeys
+        return [key + ']' for key in string.split(']') if key != '']
 
     @staticmethod
     def str_is_empty_list(string=''):
@@ -62,11 +57,6 @@ class UtilityMixin(object):
 
         if namespace:
             splited_string = string.split(namespace.group(0))
-
-            assert len(splited_string) > 0, (
-                'cannot strip namespace from' 'this key `%s`' % (string)
-            )
-
             return ''.join(splited_string)
 
         return string
@@ -84,7 +74,8 @@ class UtilityMixin(object):
         Replaces special characters like null, booleans
         also changes numbers from string to integer
         """
-        # the incoming value may not be a string sometimes
+        
+        # we have no interest in any value that is not a string
         if not isinstance(string, str):
             return string
 
@@ -103,23 +94,43 @@ class UtilityMixin(object):
         else:
             return string
 
-    def get_container(self, key, index=0):
+    def get_key(self, nested_key, position=0):
+        """
+        Get key from a nested key
+        """
+        if self.str_is_nested(nested_key):
+            nested_key = self.strip_namespace(nested_key)
+            keys = self.split_nested_str(nested_key)
+            return keys[position]
+
+        return ''
+
+    def initialize(self, nested_keys, **kwargs):
         """
         It return the appropiate container `[]`|`{}`
         based on the key provided
         """
-        if self.str_is_nested(key):
-            key = self.strip_namespace(key)
-            sub_keys = self.split_nested_str(key)
+        use_first_key = kwargs.get('use_first_key', False)
 
-            if self.str_is_list(sub_keys[index]):
+        if use_first_key:
+            key = self.get_key(next(iter(nested_keys)))
+
+            if self.str_is_list(key):
                 return []
-            elif self.str_is_dict(sub_keys[index]):
-                return {}
-            else:
-                return None
-        else:
+            
             return {}
+        else:
+            for nested_key in nested_keys:
+                condition = (
+                    not self.str_is_nested(nested_key),
+                    self.str_is_namespaced(nested_key),
+                    self.str_is_dict(self.get_key(nested_key)),
+                )
+
+                if any(condition):
+                    return {}
+
+            return []
 
     def get_index(self, key):
         """
@@ -129,8 +140,6 @@ class UtilityMixin(object):
             return self.strip_bracket(key)
         elif self.str_is_empty_list(key):
             # an empty list always has it index as '0'
-            # unless the key is repeated, then it will
-            # have an array of values attached to the same key
             return 0
 
         return self.extract_index(key)
@@ -139,15 +148,15 @@ class UtilityMixin(object):
         """
         Checks if current key is the last in the data
         """
-        keys = list(data.keys())
-        current_index = keys.index(current_key)
+        nested_keys = list(data.keys())
+        current_index = nested_keys.index(current_key)
         next_index = current_index + 1
 
         def object_type(is_obj):
             is_last = True
 
-            if next_index < len(keys):
-                next_key = self.split_nested_str(keys[next_index])[0]
+            if next_index < len(nested_keys):
+                next_key = self.get_key(nested_keys[next_index])
                 if is_obj(next_key):
                     is_last = False
 
@@ -156,8 +165,8 @@ class UtilityMixin(object):
         def namespace():
             is_last = True
 
-            if next_index < len(keys):
-                next_key = keys[next_index]
+            if next_index < len(nested_keys):
+                next_key = nested_keys[next_index]
                 if self.str_is_namespaced(next_key):
                     current_namespace = self.get_namespace(current_key)
                     next_namespace = self.get_namespace(next_key)
@@ -167,17 +176,12 @@ class UtilityMixin(object):
 
             return is_last
 
-        def ordinary():
+        def non_nested():
             is_last = True
 
-            if next_index < len(keys):
-                if not self.str_is_namespaced(keys[next_index]):
-                    next_key = self.split_nested_str(keys[next_index])[0]
-                    str_is_list = self.str_is_list(next_key)
-                    str_is_dict = self.str_is_dict(next_key)
-
-                    if not str_is_list and not str_is_dict:
-                        is_last = False
+            if next_index < len(nested_keys):
+                if not self.str_is_nested(nested_keys[next_index]):
+                    is_last = False
 
             return is_last
 
@@ -188,4 +192,4 @@ class UtilityMixin(object):
         elif is_type_of == 'dict':
             return object_type(self.str_is_dict)
         else:
-            return ordinary()
+            return non_nested()

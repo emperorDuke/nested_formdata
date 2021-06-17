@@ -12,7 +12,7 @@ from .mixins import UtilityMixin
 class BaseClass(UtilityMixin):
 
     def __init__(self, data, **kwargs):
-        self._initial_data = self.__set_data__(data)
+        self._initial_data = self.__setdata__(data)
         self._allow_empty = kwargs.get('allow_empty', False)
         self._allow_blank = kwargs.get('allow_blank', True)
 
@@ -23,10 +23,10 @@ class BaseClass(UtilityMixin):
         if not hasattr(self, '_final_data'):
             self.__process__()
 
-    def __set_data__(self, data):
+    def __setdata__(self, data):
         """
-        Check if initial_data is a MultiValueDIct and 
-        convert it to a dict object
+        Check if data is a MultiValueDIct and 
+        convert it to a dict object else return data
         """
         if isinstance(data, QueryDict):
             _data = {}
@@ -234,8 +234,7 @@ class NestedForms(BaseClass):
         Gets the final build
         """
         data_map = self._grouped_nested_data()
-        final_build = {}
-        top_wrapper = []
+        final_build = self.initialize(self._validated_data.keys())
 
         for data in data_map:
             group_key = next(iter(data.keys()))
@@ -243,31 +242,23 @@ class NestedForms(BaseClass):
 
             root_tree = self._decode(nested_struct)
 
-            if group_key:
-                final_build.setdefault(group_key, root_tree)
-            else:
-                if self.is_dict(root_tree):
+            if self.is_dict(final_build):
+                if group_key:
+                    final_build.setdefault(group_key, root_tree)
+                elif self.is_dict(root_tree):
                     final_build.update(root_tree)
-                elif self.is_list(root_tree) and final_build:
+                elif self.is_list(root_tree):
                     final_build[self.EMPTY_KEY] = root_tree
-                else:
-                    top_wrapper.append(root_tree)
+            else:
+                final_build.extend(root_tree)
 
-        if final_build:
-            top_wrapper.append(final_build)
-
-        if len(top_wrapper) == 1:
-            return top_wrapper[0]
-        elif len(top_wrapper) > 1:
-            return top_wrapper
-        else:
-            raise ParseException('unexpected empty container')
+        return final_build
 
     def _decode(self, nested_data):
         """
         Trys to Convert nested data to an object containing primitives
         """
-        root_tree = self.get_container(next(iter(nested_data.keys())))
+        root_tree = self.initialize(nested_data.keys(), use_first_key=True)
 
         for key, value in nested_data.items():
             value = self.clean_value(self.replace_specials(value))
@@ -286,7 +277,7 @@ class NestedForms(BaseClass):
         argument
         """
         ############################################################################
-        def build_root(root):
+        def build_root(root, context):
             if self.is_list(root):
                 # check the difference between index of the last item in
                 # the list and the current index to be added
@@ -326,9 +317,9 @@ class NestedForms(BaseClass):
                             if key not in inner_root:
                                 inner_root.update(context['value'])
                 else:
-                    build_root(root)
+                    build_root(root, context)
             except (KeyError, IndexError):
-                build_root(root)
+                build_root(root, context)
         else:
             # if not depth of interest unpack the root object with keys
             # provided by context['keys']
