@@ -159,13 +159,13 @@ class NestedForms(BaseClass):
                 return 'non_nested'
         ###############################################################
 
-        def update_merge_map(merged_map, old_map_value):
+        def update_merge_map(merged_map, old_map):
             updated = False
 
             for new_map in merged_map:
                 if type_of(new_map) == type_of(old_map):
                     new_map_value = next(iter(new_map.values()))
-                    new_map_value.update(old_map_value)
+                    new_map_value.update(next(iter(old_map.values())))
 
                     updated = True
 
@@ -173,10 +173,9 @@ class NestedForms(BaseClass):
         ###############################################################
 
         for old_map in grouped_data:
-            old_map_value = next(iter(old_map.values()))
-
+            
             if merged_map:
-                updated = update_merge_map(merged_map, old_map_value)
+                updated = update_merge_map(merged_map, old_map)
 
                 if not updated:
                     merged_map.append(old_map)
