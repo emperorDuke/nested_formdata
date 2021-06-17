@@ -173,13 +173,11 @@ class NestedForms(BaseClass):
         ###############################################################
 
         for old_map in grouped_data:
-            
             if merged_map:
                 updated = update_merge_map(merged_map, old_map)
 
                 if not updated:
                     merged_map.append(old_map)
-
             else:
                 merged_map.append(old_map)
 
