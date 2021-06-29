@@ -132,98 +132,39 @@ class NestedForms(BaseClass):
         """
         self._final_data = self._get_build(self._validated_data)
 
-    def _merge(self, grouped_data):
-        """
-        Merge grouped nested data with the same key
-        """
-        merged_map = []
+    def _grouped_nested_data(self, validated_data):
 
-        #################################################################
-        def type_of(nested_map):
-            # map key if present is the namespace
-            map_key = next(iter(nested_map.keys()))
-            # map value is a nested form which is a dict
-            map_value = next(iter(nested_map.values()))
-            # get the first key of nested form
-            map_value_keys = next(iter(map_value.keys()))
-            # get fisrt nested index
-            map_value_first_key = self.split_nested_str(map_value_keys)[0]
+        group, nested_keys = [], list(validated_data.keys())
 
-            if map_key:
-                return map_key
-            elif self.str_is_dict(map_value_first_key):
-                return 'dict'
-            elif self.str_is_list(map_value_first_key):
-                return 'list'
-            else:
-                return 'non_nested'
-        ###############################################################
-
-        def update_merge_map(merged_map, old_map):
-            updated = False
-
-            for new_map in merged_map:
-                if type_of(new_map) == type_of(old_map):
-                    new_map_value = next(iter(new_map.values()))
-                    new_map_value.update(next(iter(old_map.values())))
-
-                    updated = True
-
-            return updated
-        ###############################################################
-
-        for old_map in grouped_data:
-            if merged_map:
-                updated = update_merge_map(merged_map, old_map)
-
-                if not updated:
-                    merged_map.append(old_map)
-            else:
-                merged_map.append(old_map)
-
-        return merged_map
-
-    def _create_groups(self):
-        groups, temporary_map = [], {}
-
-        ###############################################################
-        def get_map(key, is_of_type, temporary_map):
-            if is_of_type == 'namespace':
+        def get_map(key, temporary_map):
+            if self.str_is_namespaced(key):
                 return {self.get_namespace(key): temporary_map}
 
             return {self.EMPTY_KEY: temporary_map}
-        #################################################################
 
-        def group(key, data, value, is_of_type='non_nested'):
-            nonlocal temporary_map
+        while nested_keys:
+            last_key = nested_keys.pop()
+            other_keys = []
+            temporary_map = {}
 
-            if self.key_is_last(key, data, is_of_type):
-                temporary_map.setdefault(self.strip_namespace(key), value)
-                groups.append(get_map(key, is_of_type, temporary_map))
-                temporary_map = {}
-            else:
-                temporary_map.setdefault(self.strip_namespace(key), value)
-        ###################################################################
+            for key in nested_keys:
+                if self.type_of(key) == self.type_of(last_key):
+                    value = validated_data[key]
+                    key = self.strip_namespace(key)
 
-        return (groups, group)
+                    temporary_map.setdefault(key, value)
+                else:
+                    other_keys.append(key)
 
-    def _grouped_nested_data(self, validated_data):
-        """
-        It groups nested structures of the same kind and namespaces together
-        """
-        data, (groups, group) = validated_data, self._create_groups()
+            striped_last_key = self.strip_namespace(last_key)
+            last_value = validated_data[last_key]
 
-        for key, value in data.items():
-            if self.str_is_namespaced(key):
-                group(key, data, value, 'namespace')
-            elif self.str_is_list(self.split_nested_str(key)[0]):
-                group(key, data, value, 'list')
-            elif self.str_is_dict(self.split_nested_str(key)[0]):
-                group(key, data, value, 'dict')
-            else:
-                group(key, data, value)
+            temporary_map.setdefault(striped_last_key, last_value)
+            group.append(get_map(last_key, temporary_map))
 
-        return self._merge(groups)
+            nested_keys = other_keys
+
+        return group
 
     def _get_build(self, validated_data):
         """

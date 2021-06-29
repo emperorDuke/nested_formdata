@@ -3,6 +3,7 @@ import re
 # Nested Form data deserializer utility class
 # --------------------------------------------
 
+
 class UtilityMixin(object):
     _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){2,}')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
@@ -74,7 +75,7 @@ class UtilityMixin(object):
         Replaces special characters like null, booleans
         also changes numbers from string to integer
         """
-        
+
         # we have no interest in any value that is not a string
         if not isinstance(string, str):
             return string
@@ -117,7 +118,7 @@ class UtilityMixin(object):
 
             if self.str_is_list(key):
                 return []
-            
+
             return {}
         else:
             for nested_key in nested_keys:
@@ -144,52 +145,18 @@ class UtilityMixin(object):
 
         return self.extract_index(key)
 
-    def key_is_last(self, current_key, data, is_type_of='non_nested'):
+    def type_of(self, nested_key):
         """
-        Checks if current key is the last in the data
+        Return the type of nested key
         """
-        nested_keys = list(data.keys())
-        current_index = nested_keys.index(current_key)
-        next_index = current_index + 1
-
-        def object_type(is_obj):
-            is_last = True
-
-            if next_index < len(nested_keys):
-                next_key = self.get_key(nested_keys[next_index])
-                if is_obj(next_key):
-                    is_last = False
-
-            return is_last
-
-        def namespace():
-            is_last = True
-
-            if next_index < len(nested_keys):
-                next_key = nested_keys[next_index]
-                if self.str_is_namespaced(next_key):
-                    current_namespace = self.get_namespace(current_key)
-                    next_namespace = self.get_namespace(next_key)
-
-                    if current_namespace == next_namespace:
-                        is_last = False
-
-            return is_last
-
-        def non_nested():
-            is_last = True
-
-            if next_index < len(nested_keys):
-                if not self.str_is_nested(nested_keys[next_index]):
-                    is_last = False
-
-            return is_last
-
-        if is_type_of == 'list':
-            return object_type(self.str_is_list)
-        elif is_type_of == 'namespace':
-            return namespace()
-        elif is_type_of == 'dict':
-            return object_type(self.str_is_dict)
+        if self.str_is_namespaced(nested_key):
+            return self.get_namespace(nested_key)
         else:
-            return non_nested()
+            first_nested_key = self.split_nested_str(nested_key)[0]
+
+            if self.str_is_dict(first_nested_key):
+                return 'dict'
+            elif self.str_is_list(first_nested_key):
+                return 'list'
+            else:
+                return 'non_nested'
