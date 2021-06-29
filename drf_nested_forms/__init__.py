@@ -1,5 +1,5 @@
 __title__ = 'drf_nested_formdata'
-__version__ = '1.1.4'
+__version__ = '1.1.5'
 __author__ = 'Duke Effiom'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2021'
