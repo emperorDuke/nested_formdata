@@ -51,6 +51,19 @@ class NestedFormBaseClass(UtilityMixin):
     def _process(self):
         raise NotImplementedError('`_process()` is not implemented')
 
+    def _clean_value(self, value, default=None):
+        """
+        Replace empty list, dict and empty string with `None`
+        """
+        if value == '' and not self._allow_blank:
+            return default
+        elif is_list(value) and not value and not self._allow_empty:
+            return default
+        elif is_dict(value) and not value and not self._allow_empty:
+            return default
+
+        return value
+
     def is_nested(self, raise_exception=False):
         """
         Checks if the initial data map is a nested object
@@ -80,19 +93,6 @@ class NestedFormBaseClass(UtilityMixin):
             self.__run__()
 
         return all(conditions)
-
-    def clean_value(self, value, default=None):
-        """
-        Replace empty list, dict and empty string with `None`
-        """
-        if value == '' and not self._allow_blank:
-            return default
-        elif is_list(value) and not value and not self._allow_empty:
-            return default
-        elif is_dict(value) and not value and not self._allow_empty:
-            return default
-
-        return value
 
 
 # converts a nested form data to object
@@ -179,7 +179,7 @@ class NestedForm(NestedFormBaseClass):
         tree = self.get_tree(nested_data.keys(), use_first_key=True)
 
         for key, value in nested_data.items():
-            value = self.clean_value(self.replace_specials(value))
+            value = self._clean_value(self.replace_specials(value))
 
             if self.str_is_nested(key):
                 self._build_tree(key, value, tree)
