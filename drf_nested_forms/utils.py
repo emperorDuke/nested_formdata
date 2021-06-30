@@ -1,12 +1,11 @@
 from collections.abc import Mapping
-from rest_framework.utils import html
 
 from .exceptions import ParseError
 from .mixins import UtilityMixin
 from .helpers import is_dict, is_list
 
 
-# Base serilizer for converting nested formdata to objects
+# Base class for converting nested form data to objects
 # ---------------------------------------------------------
 
 class NestedFormBaseClass(UtilityMixin):
@@ -25,7 +24,7 @@ class NestedFormBaseClass(UtilityMixin):
         Check if data is a MultiValueDIct and 
         convert it to a dict object else return data
         """
-        if html.is_html_input(data):
+        if hasattr(data, 'getlist'):
             _data = {}
 
             for key, value in dict(data).items():
@@ -96,7 +95,7 @@ class NestedFormBaseClass(UtilityMixin):
         return value
 
 
-# serilizes a nested form data to object
+# converts a nested form data to object
 # ---------------------------------------
 
 class NestedForm(NestedFormBaseClass):
