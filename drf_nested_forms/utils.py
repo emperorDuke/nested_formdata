@@ -1,26 +1,24 @@
 from collections.abc import Mapping
 from rest_framework.utils import html
 
-from .exceptions import ParseException
+from .exceptions import ParseError
 from .mixins import UtilityMixin
+from .helpers import is_dict, is_list
 
 
 # Base serilizer for converting nested formdata to objects
 # ---------------------------------------------------------
 
-class BaseClass(UtilityMixin):
+class NestedFormBaseClass(UtilityMixin):
 
     def __init__(self, data, **kwargs):
         self._initial_data = self.__setdata__(data)
         self._allow_empty = kwargs.get('allow_empty', False)
         self._allow_blank = kwargs.get('allow_blank', True)
 
-    def __process__(self):
-        raise NotImplementedError('`__process__()` is not implemented')
-
     def __run__(self):
         if not hasattr(self, '_final_data'):
-            self.__process__()
+            self._process()
 
     def __setdata__(self, data):
         """
@@ -51,27 +49,8 @@ class BaseClass(UtilityMixin):
 
         return self._final_data
 
-    @property
-    def validated_data(self):
-        if not hasattr(self, '_validated_data'):
-            msg = '`.is_nested()` has to be called before accessing `.validated_data`'
-            raise AssertionError(msg)
-
-        return self._validated_data
-
-    @staticmethod
-    def is_dict(obj):
-        """
-        Check if object is a dictionary
-        """
-        return isinstance(obj, dict)
-
-    @staticmethod
-    def is_list(obj):
-        """
-        Check if object is a list
-        """
-        return isinstance(obj, list)
+    def _process(self):
+        raise NotImplementedError('`_process()` is not implemented')
 
     def is_nested(self, raise_exception=False):
         """
@@ -109,9 +88,9 @@ class BaseClass(UtilityMixin):
         """
         if value == '' and not self._allow_blank:
             return default
-        elif self.is_list(value) and len(value) == 0 and not self._allow_empty:
+        elif is_list(value) and not value and not self._allow_empty:
             return default
-        elif self.is_dict(value) and len(value) == 0 and not self._allow_empty:
+        elif is_dict(value) and not value and not self._allow_empty:
             return default
 
         return value
@@ -120,20 +99,23 @@ class BaseClass(UtilityMixin):
 # serilizes a nested form data to object
 # ---------------------------------------
 
-class NestedForms(BaseClass):
+class NestedForm(NestedFormBaseClass):
     """
     Decode nested forms into python object
     """
     EMPTY_KEY = ''
 
-    def __process__(self):
+    def _process(self):
         """
         Initiates the conversion process
         """
-        self._final_data = self._get_build(self._validated_data)
+        self._final_data = self._get_root_tree(self._validated_data)
 
     def _grouped_nested_data(self, validated_data):
-
+        """
+        Groups nested data based on their type example `namespaced` `list`
+        `dict` and `non-nested`
+        """
         group, nested_keys = [], list(validated_data.keys())
 
         def get_map(key, temporary_map):
@@ -166,106 +148,51 @@ class NestedForms(BaseClass):
 
         return group
 
-    def _get_build(self, validated_data):
+    def _get_root_tree(self, validated_data):
         """
         Gets the final build
         """
-        data_map = self._grouped_nested_data(validated_data)
-        final_build = self.initialize(validated_data.keys())
+        groups = self._grouped_nested_data(validated_data)
+        root_tree = self.get_tree(validated_data.keys())
 
-        for data in data_map:
-            group_key = next(iter(data.keys()))
-            nested_struct = next(iter(data.values()))
+        for group in groups:
+            group_key = next(iter(group.keys()))
+            group_value = next(iter(group.values()))
 
-            root_tree = self._decode(nested_struct)
+            group_tree = self._decode(group_value)
 
-            if self.is_dict(final_build):
+            if is_dict(root_tree):
                 if group_key:
-                    final_build.setdefault(group_key, root_tree)
-                elif self.is_dict(root_tree):
-                    final_build.update(root_tree)
+                    root_tree.setdefault(group_key, group_tree)
+                elif is_dict(group_tree):
+                    root_tree.update(group_tree)
                 else:
-                    final_build[self.EMPTY_KEY] = root_tree
+                    root_tree[self.EMPTY_KEY] = group_tree
             else:
-                final_build.extend(root_tree)
+                root_tree.extend(group_tree)
 
-        return final_build
+        return root_tree
 
     def _decode(self, nested_data):
         """
-        Trys to Convert nested data to an object containing primitives
+        Trys to convert nested data to an object containing primitives
         """
-        root_tree = self.initialize(nested_data.keys(), use_first_key=True)
+        tree = self.get_tree(nested_data.keys(), use_first_key=True)
 
         for key, value in nested_data.items():
             value = self.clean_value(self.replace_specials(value))
 
             if self.str_is_nested(key):
-                self._build_object(key, value, root_tree)
+                self._build_tree(key, value, tree)
             else:
-                # the root tree is automatically a dict
-                root_tree.setdefault(key, value)
+                # the tree tree is automatically a dict
+                tree.setdefault(key, value)
 
-        return root_tree
+        return tree
 
-    def _build_step_structure(self, root, context, depth=0):
+    def _build_tree(self, nested_key, value, tree):
         """
-        Insert and updates the root tree according to the context passed as
-        argument
-        """
-        ############################################################################
-        def build_root(root, context):
-            if self.is_list(root):
-                # check the difference between index of the last item in
-                # the list and the current index to be added
-                undefined_count = abs(len(root) - context['index'])
-
-                if undefined_count > 1000:
-                    raise ParseException('too many consecutive empty arrays !')
-                elif undefined_count > 1 and undefined_count <= 1000:
-                    # if it is sparse
-                    # fill gaps with the `None`
-                    root += [None] * undefined_count
-                    # append the default value
-                    root.append(context['value'])
-                elif context['value'] and self.is_list(context['value']):
-                    # if context value is not empty and its a list, transfer
-                    # value into the root
-                    root.extend(context['value'])
-                else:
-                    # just append like default
-                    root.append(context['value'])
-            else:
-                root[context['index']] = context['value']
-        ###############################################################################
-
-        if context['depth'] == depth:
-            try:
-                # check if the root of interest is empty or exist
-                inner_root = root[context['index']]
-
-                if inner_root:
-                    if self.is_list(inner_root) and context['value']:
-                        inner_root.append(context['value'])
-                    elif self.is_dict(inner_root) and self.is_dict(context['value']):
-                        #  get keys that are not in inner root
-                        # transfer their values to inner_root
-                        for key in context['value'].keys():
-                            if key not in inner_root:
-                                inner_root.update(context['value'])
-                else:
-                    build_root(root, context)
-            except (KeyError, IndexError):
-                build_root(root, context)
-        else:
-            # if not depth of interest unpack the root object with keys
-            # provided by context['keys']
-            key = context['keys'][depth]
-            self._build_step_structure(root[key], context, depth=depth + 1)
-
-    def _build_object(self, nested_key, value, root_tree):
-        """
-        Build the data structure for a nested key and insert value
+        Build the tree for a nested key and insert value
         """
         steps = self.split_nested_str(nested_key)
         steps_index_keys = []
@@ -299,9 +226,54 @@ class NestedForms(BaseClass):
             return value
 
         for depth, step in enumerate(steps):
-            self._build_step_structure(root_tree, {
+            self._build_step_structure(tree, {
                 'depth': depth,
                 'index': self.get_index(step),
                 'value': get_value(depth),
                 'keys': get_index_keys(depth)
             })
+
+    def _build_step_structure(self, tree, context, depth=0):
+        """
+        Insert and updates the tree according to the context passed as
+        argument
+        """
+        ############################################################################
+        def create_tree(tree, context):
+            if is_list(tree):
+                index = abs(len(tree) - context['index'])
+
+                if index > 1000:
+                    raise ParseError('too many consecutive empty arrays !')
+                elif index > 1 and index <= 1000:
+                    # if it is sparse fill gaps with the `None`
+                    # followed by the default value
+                    tree += [None] * index
+                    tree.append(context['value'])
+                elif context['value'] and is_list(context['value']):
+                    tree.extend(context['value'])
+                else:
+                    tree.append(context['value'])
+            else:
+                tree[context['index']] = context['value']
+        ###############################################################################
+
+        while context['depth'] != depth:
+            tree = tree[context['keys'][depth]]
+            depth += 1
+
+        try:
+            inner_tree = tree[context['index']]
+
+            if inner_tree:
+                if is_list(inner_tree) and context['value']:
+                    inner_tree.append(context['value'])
+                elif is_dict(inner_tree) and is_dict(context['value']):
+                    key = next(iter(context['value'].keys()))
+
+                    if key not in inner_tree:
+                        inner_tree.update(context['value'])
+            else:
+                create_tree(tree, context)
+        except (KeyError, IndexError):
+            create_tree(tree, context)

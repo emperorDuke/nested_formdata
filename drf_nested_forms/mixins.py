@@ -3,8 +3,7 @@ import re
 # Nested Form data deserializer utility class
 # --------------------------------------------
 
-
-class UtilityMixin(object):
+class UtilityMixin:
     _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){2,}')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
     _list_re = re.compile(r'\[[0-9]+\]')
@@ -106,9 +105,9 @@ class UtilityMixin(object):
 
         return ''
 
-    def initialize(self, nested_keys, **kwargs):
+    def get_tree(self, nested_keys, **kwargs):
         """
-        It return the appropiate container `[]`|`{}`
+        It return the appropiate object `[]`|`{}`
         based on the key provided
         """
         use_first_key = kwargs.get('use_first_key', False)

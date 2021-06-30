@@ -5,9 +5,9 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2021'
 
 # Version synonym
-from .exceptions import ParseException
+from .exceptions import ParseError
 from .parsers import NestedMultiPartParser, NestedJSONParser
 from .mixins import UtilityMixin
-from .utils import NestedForms
+from .utils import NestedForm
 
 VERSION = __version__

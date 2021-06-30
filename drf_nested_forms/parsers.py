@@ -1,6 +1,6 @@
 from rest_framework.parsers import MultiPartParser, JSONParser
 
-from .utils import NestedForms
+from .utils import NestedForm
 from .settings import api_settings
 
 
@@ -21,7 +21,7 @@ class NestedMultiPartParser(MultiPartParser):
         else:
             self._full_data = parsed.data
 
-        form = NestedForms(self._full_data, **self.options)
+        form = NestedForm(self._full_data, **self.options)
 
         if form.is_nested():
             return form.data
@@ -38,7 +38,7 @@ class NestedJSONParser(JSONParser):
     def parse(self, stream, media_type=None, parser_context=None):
         parsed = super().parse(stream, media_type, parser_context)
 
-        form = NestedForms(parsed, **self.options)
+        form = NestedForm(parsed, **self.options)
 
         if form.is_nested():
             return form.data
