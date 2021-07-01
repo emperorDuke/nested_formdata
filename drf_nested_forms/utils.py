@@ -117,19 +117,19 @@ class NestedForm(NestedFormBaseClass):
         """
         group, nested_keys = [], list(validated_data.keys())
 
-        def get_map(key, temporary_map):
+        def get_key(key):
             if self.str_is_namespaced(key):
-                return {self.get_namespace(key): temporary_map}
+                return self.get_namespace(key)
 
-            return {self.EMPTY_KEY: temporary_map}
+            return self.EMPTY_KEY
 
         while nested_keys:
-            last_key = nested_keys.pop()
+            first_key = nested_keys[0]
             other_keys = []
             temporary_map = {}
 
             for key in nested_keys:
-                if self.type_of(key) == self.type_of(last_key):
+                if self.type_of(key) == self.type_of(first_key):
                     value = validated_data[key]
                     key = self.strip_namespace(key)
 
@@ -137,12 +137,7 @@ class NestedForm(NestedFormBaseClass):
                 else:
                     other_keys.append(key)
 
-            striped_last_key = self.strip_namespace(last_key)
-            last_value = validated_data[last_key]
-
-            temporary_map.setdefault(striped_last_key, last_value)
-            group.append(get_map(last_key, temporary_map))
-
+            group.append({get_key(first_key): temporary_map})
             nested_keys = other_keys
 
         return group
