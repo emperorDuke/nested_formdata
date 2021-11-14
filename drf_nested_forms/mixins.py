@@ -4,7 +4,7 @@ import re
 # --------------------------------------------
 
 class UtilityMixin:
-    _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){2,}')
+    _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){1,}')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
     _list_re = re.compile(r'\[[0-9]+\]')
     _number_re = re.compile(r'[0-9]+')
@@ -56,7 +56,7 @@ class UtilityMixin:
         namespace = self._namespace_re.match(string)
 
         if namespace:
-            splited_string = string.split(namespace.group(0))
+            splited_string = string.split(namespace.group(0), 1)
             return ''.join(splited_string)
 
         return string

@@ -75,13 +75,13 @@ class NestedFormTestCase(unittest.TestCase):
         data_3 = {
             'vendor_metric': 'L',
             'attribute': 'size',
-            '[variant][]': 'color',
+            'product[variant]': 'color',
         }
 
         expected_output = {
             'vendor_metric': 'L',
             'attribute': 'size',
-            'variant': ['color']
+            'product': {'variant': 'color'}
         }
 
         form = NestedForm(data_3)
