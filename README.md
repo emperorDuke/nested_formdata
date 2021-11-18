@@ -28,7 +28,7 @@ The utiliy class can be used directly in any part of the code.
 
 ```python
 
-from drf_nested_forms.utils import NestedForms
+from drf_nested_forms.utils import NestedForm
 
 data = {
     'item[attribute][0][user_type]': 'size',
@@ -50,7 +50,7 @@ options = {
 `.is_nested()` should be called before accessing the `.data`
 
 ```python
-form = NestedForms(data, **options)
+form = NestedForm(data, **options)
 form.is_nested(raise_exception=True)
 ```
 

@@ -4,7 +4,7 @@ import re
 # --------------------------------------------
 
 class UtilityMixin:
-    _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\]){1,}')
+    _nested_re = re.compile(r'((.+)(\[(.*)\])+)|(\[(.*)\])+')
     _namespace_re = re.compile(r'^([\w]+)(?=\[)')
     _list_re = re.compile(r'\[[0-9]+\]')
     _number_re = re.compile(r'[0-9]+')
@@ -69,7 +69,7 @@ class UtilityMixin:
 
         return None
 
-    def replace_specials(self, string):
+    def replace_special(self, string):
         """
         Replaces special characters like null, booleans
         also changes numbers from string to integer

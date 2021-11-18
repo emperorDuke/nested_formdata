@@ -174,7 +174,7 @@ class NestedForm(NestedFormBaseClass):
         tree = self.get_tree(nested_data.keys(), use_first_key=True)
 
         for key, value in nested_data.items():
-            value = self._clean_value(self.replace_specials(value))
+            value = self._clean_value(self.replace_special(value))
 
             if self.str_is_nested(key):
                 self._build_tree(key, value, tree)
