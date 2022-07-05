@@ -4,7 +4,7 @@ bleach==3.3.0
 certifi==2021.5.30
 chardet==4.0.0
 colorama==0.4.4
-Django==3.2.9
+Django==3.2.14
 djangorestframework==3.12.4
 docutils==0.17.1
 idna==2.10
