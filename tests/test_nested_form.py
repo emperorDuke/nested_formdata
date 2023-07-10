@@ -288,3 +288,28 @@ class NestedFormTestCase(unittest.TestCase):
         with self.assertRaises(ParseError):
             form = NestedForm(data)
             form.is_nested(raise_exception=True)
+
+    def test_data_10(self):
+        """
+        test that will verify if "is_nested" is not throwing 
+        unexpected exceptions when given a list in standard
+        JSON format (used to throw AttributeError)
+        """
+        data = [
+            {
+                "field1": 1,
+                "field2": 2
+            },
+        ]
+
+        form = NestedForm(data)
+        try:
+            form.is_nested()
+            # Whatever is returned from is_nested() is not relevant
+            # for this test. In the future the library might start
+            # handling JSON lists as valid input, therefore the test
+            # should not expect is_nested() to return False
+        except Exception as e:
+            self.fail(
+                f"NestedForm failed with an unhandled exception ({e})"
+            )

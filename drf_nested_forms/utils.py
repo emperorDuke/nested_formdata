@@ -72,8 +72,23 @@ class NestedFormBaseClass(UtilityMixin):
         conditions = [is_mapping]
 
         #############################################################
-        if not is_mapping and raise_exception:
-            raise ValueError('`data` is not a map type')
+        # If "is_mapping" is False, code "self._initial_data.keys()" 
+        # will raise an AttributeError and in result request method 
+        # will receive an empty QueryDict, instead of parsed data
+        # (even if the data could be parsed by another parser in DRF
+        # DEFAULT_PARSER_CLASSES!)
+        #
+        # Example: exception is raised for self._initial_data == [
+        #   {
+        #       "field1": 1, 
+        #       "field2": 2
+        #   }
+        # ]
+        # 
+        if not is_mapping:
+            if raise_exception:
+                raise ValueError('`data` is not a map type')
+            return False
         #############################################################
 
         matched_keys = [
