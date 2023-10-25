@@ -7,13 +7,19 @@ env:
     - DJANGO="django==3.2.4"
 matrix:
   include:
+    - name: "Python 3.11"
+      python: "3.11"
+    - name: "Python 3.10"
+      python: "3.10"
+    - name: "Python 3.9"
+      python: "3.9"
     - name: "Python 3.8"
       python: "3.8"
     - name: "Python 3.7"
       python: "3.7"
     - name: "Python 3.6"
       python: "3.6"
-      - name: "Django 1.11"
+    - name: "Django 1.11"
       env:
         - DJANGO="django==1.11.27"
     - name: "Django 2.2"
@@ -24,6 +30,10 @@ matrix:
       env:
         - DJANGO="django==3.2.4"
         - DRF="djangorestframework==3.12.4"
+    - name: "Django 4.2.6"
+      env:
+        - DJANGO="django==4.2.6"
+        - DRF="djangorestframework==3.14.4"
         
 install: pip install -r requirements.txt
 
